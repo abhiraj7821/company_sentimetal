@@ -1,0 +1,35 @@
+{
+  "companies": [
+    {
+      "company": "AAPL",
+      "facts": [
+        "Apple's fiscal year 2025 Q4 revenue was $94.9 billion",
+        "iPhone revenue accounted for 48.2% of total sales in Q4 2025",
+        "Services revenue reached $25.0 billion in Q4 2025",
+        "Apple's net income in Q4 2025 was $22.1 billion",
+        "The company declared a quarterly dividend of $0.24 per share",
+        "Apple had 2.2 billion active devices globally as of Q4 2025"
+      ]
+    },
+    {
+      "company": "MSFT",
+      "facts": [
+        "Microsoft's Q1 FY2026 revenue was $65.6 billion",
+        "Azure and other cloud services revenue grew 33%",
+        "Operating income was $30.2 billion",
+        "Microsoft returned $8.4 billion to shareholders through share repurchases and dividends",
+        "LinkedIn revenue increased 10% year-over-year"
+      ]
+    },
+    {
+      "company": "TSLA",
+      "facts": [
+        "Tesla delivered 463,000 vehicles in Q3 2025",
+        "Total revenue was $25.1 billion in Q3 2025",
+        "Automotive gross margin was 16.3%",
+        "Operating cash flow was $4.9 billion",
+        "Tesla produced 430,000 vehicles in Q3 2025"
+      ]
+    }
+  ]
+}

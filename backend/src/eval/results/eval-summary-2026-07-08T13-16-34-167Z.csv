@@ -1,0 +1,4 @@
+company,total_claims,grounded_claims,score
+AAPL,12,3,0.25
+MSFT,12,2,0.17
+TSLA,12,2,0.17

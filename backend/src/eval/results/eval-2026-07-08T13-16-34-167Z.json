@@ -1,0 +1,231 @@
+[
+  {
+    "company": "AAPL",
+    "facts": [
+      "Apple's fiscal year 2025 Q4 revenue was $94.9 billion",
+      "iPhone revenue accounted for 48.2% of total sales in Q4 2025",
+      "Services revenue reached $25.0 billion in Q4 2025",
+      "Apple's net income in Q4 2025 was $22.1 billion",
+      "The company declared a quarterly dividend of $0.24 per share",
+      "Apple had 2.2 billion active devices globally as of Q4 2025"
+    ],
+    "report": "# APPLE INC. (AAPL) – EQUITY RESEARCH REPORT\n\n## Executive Summary\n\nApple Inc. remains a dominant player in consumer technology with a diversified product portfolio spanning smartphones, computing devices, wearables, and high-growth services. Based on available SEC filings through May 2026, the company maintains its standard quarterly reporting cadence with the most recent 10-Q filed on May 1, 2026. However, this analysis is significantly constrained by incomplete data availability—current news sentiment, recent earnings details, and forward guidance are unavailable due to technical limitations in data retrieval. **Investors should treat this report as preliminary pending access to complete financial statements and recent market commentary.**\n\n---\n\n## Key Findings\n\n### Filing Activity & Compliance\n- **Current Filing Status**: Apple maintains full regulatory compliance with timely quarterly (10-Q) and annual (10-K) filings\n- **Most Recent Filings**:\n  - 10-Q: May 1, 2026 (Accession: 0000320193-26-000013)\n  - 10-K: October 31, 2025 (Accession: 0000320193-25-000079)\n- **Filing Frequency**: Consistent quarterly schedule demonstrates operational stability and transparent disclosure practices\n\n### Business Segments & Product Portfolio\nBased on available product information, Apple's revenue streams include:\n\n1. **Hardware** (Primary Revenue Driver)\n   - **iPhone**: $799–$1,199+ (flagship product line)\n   - **Mac**: $1,099–$3,999+ (computing devices)\n   - **iPad**: $329–$1,599+ (tablet ecosystem)\n   - **Wearables**: Apple Watch ($249–$799+), AirPods ($129–$549)\n\n2. **Services** (High-Margin Growth Driver)\n   - Apple Music, iCloud+, Apple TV+, Apple Arcade, Apple News+\n   - Bundled offerings (Apple One)\n   - Recurring revenue model with strong retention characteristics\n\n### Strategic Positioning\n- **Premium Pricing Strategy**: Consistent high-end positioning across all categories\n- **Ecosystem Integration**: Cross-device synergy drives customer lock-in and lifetime value\n- **Financing & Trade-In Programs**: Accessibility mechanisms to broaden addressable market\n\n---\n\n## Risks & Contradictions\n\n### Data Limitations\n⚠️ **Critical Gap**: This analysis is severely constrained by:\n- **No recent earnings data** from the May 2026 10-Q (financial statements not provided)\n- **No news sentiment analysis** (news retrieval service unavailable)\n- **No forward guidance** or management commentary\n- **No competitive benchmarking** against peers (Samsung, Microsoft, Google)\n\n### Known Structural Risks (Industry Standard)\n1. **iPhone Concentration Risk**: Historically, iPhone revenue represents 40–50% of total revenue; any product cycle disruption poses material downside\n2. **Geographic Concentration**: Significant exposure to China manufacturing and market demand\n3. **Regulatory Headwinds**: \n   - Ongoing antitrust scrutiny (App Store policies)\n   - Potential restrictions on supply chain (semiconductors, rare earth materials)\n4. **Competitive Pressure**: Intensifying competition in services from Microsoft, Google, Amazon\n5. **Macroeconomic Sensitivity**: Premium-priced products vulnerable to consumer spending pullbacks\n\n### Unresolved Contradictions\n- **Services Growth vs. Hardware Maturity**: While services offer higher margins and recurring revenue, hardware remains the primary revenue driver; sustainability of this mix unclear without recent financials\n- **Premium Positioning vs. Market Saturation**: Continued pricing power in mature markets (North America, Western Europe) uncertain\n\n---\n\n## Sentiment Overview\n\n### Available Sentiment Data\n**Status**: ⚠️ **UNAVAILABLE** – News sentiment analysis could not be completed due to technical limitations in data retrieval.\n\n### Typical Market Sentiment Drivers (Historical Context)\nBased on standard Apple coverage themes:\n- **Positive Catalysts**: New product launches, services growth acceleration, margin expansion, capital returns\n- **Negative Catalysts**: iPhone sales misses, China demand weakness, regulatory actions, supply chain disruptions\n- **Neutral Factors**: Quarterly guidance maintenance, market share stability\n\n**Current Sentiment Assessment**: **INDETERMINATE** – Cannot be reliably assessed without recent news flow and earnings commentary.\n\n---\n\n## Conclusion\n\n### Investment Perspective\n\n**Rating**: **HOLD (Pending Data Completion)**\n\nApple Inc. demonstrates:\n✓ Strong regulatory compliance and transparent disclosure  \n✓ Diversified revenue streams across hardware and high-margin services  \n✓ Established ecosystem moat and premium brand positioning  \n✓ Consistent operational execution (evidenced by filing timeliness)\n\n**However**, a comprehensive investment recommendation **cannot be responsibly issued** without:\n- Complete financial statements from the May 2026 10-Q (revenue, earnings, cash flow, guidance)\n- Current market sentiment and analyst consensus\n- Recent earnings call commentary and management guidance\n- Competitive positioning updates\n\n### Recommended Next Steps\n\n1. **Obtain Complete 10-Q Filing** (May 1, 2026): Review MD&A, financial statements, and risk factor updates\n2. **Analyze Recent Earnings Call**: Assess management commentary on iPhone demand, services growth, and China exposure\n3. **Monitor Regulatory Developments**: Track antitrust proceedings and supply chain policy changes\n4. **Benchmark Against Peers**: Compare valuation multiples, margin trends, and growth rates vs. Microsoft, Alphabet, Meta\n5. **Reassess in 30 Days**: Pending resolution of data retrieval issues\n\n---\n\n**Report Prepared**: Based on available SEC filing metadata and product portfolio information  \n**Data Completeness**: ~40% (filing structure only; financial data unavailable)  \n**Confidence Level**: LOW – Recommend treating as preliminary framework only",
+    "groundedness": {
+      "score": 0.25,
+      "claims": [
+        {
+          "claim": "# APPLE INC. (AAPL) – EQUITY RESEARCH REPORT\n\n## Executive Summary\n\nApple Inc. remains a dominant player in consumer technology with a diversified product portfolio spanning smartphones, computing devices, wearables, and high-growth services. Based on available SEC filings through May 2026, the company maintains its standard quarterly reporting cadence with the most recent 10-Q filed on May 1, 2026. However, this analysis is significantly constrained by incomplete data availability—current news sentiment, recent earnings details, and forward guidance are unavailable due to technical limitations in data retrieval. **Investors should treat this report as preliminary pending access to complete financial statements and recent market commentary.**",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe claim states that \"the most recent 10-Q filed on May 1, 2026\" and that analysis is \"constrained by incomplete data availability—current news sentiment, recent earnings details, and forward guidance are unavailable.\" The research data fully supports these statements—it confirms the May 1, 2026 10-Q filing and documents the technical failures in retrieving news and sentiment data. However, the claim presents this as an \"Equity Research Report\" with an \"Executive Summary,\" implying a complete analytical product, when the research data explicitly shows critical components are missing and the analysis is admittedly preliminary and incomplete. The framing overstates what the incomplete data actually supports."
+        },
+        {
+          "claim": "--\n\n## Key Findings\n\n### Filing Activity & Compliance",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe claim section is empty/blank. There is no actual claim provided to fact-check against the research data. Without a specific claim to verify, it cannot be determined if the data supports it."
+        },
+        {
+          "claim": "**Current Filing Status**: Apple maintains full regulatory compliance with timely quarterly (10-Q) and annual (10-K) filings",
+          "isTrue": true,
+          "explanation": "TRUE\n\nThe research data shows Apple has filed 10-Q reports quarterly (May 2026, January 2026, August 2025, May 2025) and a 10-K annually (October 2025), following the standard reporting schedule with filings approximately every 3 months. This pattern demonstrates timely compliance with SEC filing requirements."
+        },
+        {
+          "claim": "**Most Recent Filings**:",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe claim states \"Most Recent Filings\" but provides no specific details to verify. While the research data does contain SEC filing information showing Apple's most recent filing is a 10-Q from May 1, 2026, the claim itself is incomplete and lacks substantive content to fact-check against the provided data."
+        },
+        {
+          "claim": "10-Q: May 1, 2026 (Accession: 0000320193-26-000013)",
+          "isTrue": true,
+          "explanation": "TRUE\n\nThe research data explicitly confirms that Apple Inc. filed a 10-Q on May 1, 2026 with Accession Number 0000320193-26-000013, exactly matching the claim."
+        },
+        {
+          "claim": "10-K: October 31, 2025 (Accession: 0000320193-25-000079)",
+          "isTrue": true,
+          "explanation": "TRUE\n\nThe research data explicitly confirms that Apple Inc. filed a 10-K on October 31, 2025 with Accession Number 0000320193-25-000079, which exactly matches the claim provided."
+        },
+        {
+          "claim": "**Filing Frequency**: Consistent quarterly schedule demonstrates operational stability and transparent disclosure practices\n\n### Business Segments & Product Portfolio\nBased on available product information, Apple's revenue streams include:",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data shows Apple files on a quarterly schedule (10-Q filings approximately every 3 months) and follows standard SEC reporting requirements, which supports the \"consistent quarterly schedule\" part of the claim. However, the data does NOT contain any information about Apple's \"transparent disclosure practices\" beyond confirming they file required SEC documents. The claim makes two assertions, but only one is directly supported by the provided data."
+        },
+        {
+          "claim": "**Hardware** (Primary Revenue Driver)",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data provided contains only SEC filing metadata and information about filing dates/types. It does not include any financial statements, revenue breakdowns by product category, or data showing that Hardware is Apple's primary revenue driver. The claim requires specific revenue data that is not present in the excerpts provided."
+        },
+        {
+          "claim": "**iPhone**: $799–$1,199+ (flagship product line)",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data provided contains only SEC filing information and technical error messages about news retrieval. It does not include any pricing information about iPhones or verification of the $799–$1,199+ price range claim."
+        },
+        {
+          "claim": "**Mac**: $1,099–$3,999+ (computing devices)",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data provided contains only SEC filing information and notes about technical difficulties retrieving news and pricing data. It does not include any information about Mac pricing ranges ($1,099–$3,999+). The claim cannot be verified from the available research data."
+        },
+        {
+          "claim": "**iPad**: $329–$1,599+ (tablet ecosystem)",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data provided contains only SEC filing information and notes about technical difficulties retrieving news and pricing data. It does not include any information about iPad pricing ranges ($329–$1,599+) to verify or support the claim."
+        },
+        {
+          "claim": "**Wearables**: Apple Watch ($249–$799+), AirPods ($129–$549)",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data provided contains only SEC filing information and technical error messages about news retrieval and sentiment analysis. It does not contain any pricing information for Apple Watch or AirPods to verify the claimed price ranges ($249–$799+ for Apple Watch and $129–$549 for AirPods)."
+        }
+      ]
+    }
+  },
+  {
+    "company": "MSFT",
+    "facts": [
+      "Microsoft's Q1 FY2026 revenue was $65.6 billion",
+      "Azure and other cloud services revenue grew 33%",
+      "Operating income was $30.2 billion",
+      "Microsoft returned $8.4 billion to shareholders through share repurchases and dividends",
+      "LinkedIn revenue increased 10% year-over-year"
+    ],
+    "report": "# MICROSOFT CORPORATION (MSFT) – EQUITY RESEARCH REPORT\n\n## Executive Summary\n\nMicrosoft Corporation presents a mixed research picture based on available data as of April 2026. While the company maintains consistent SEC filing compliance and operates across diversified, high-margin business segments (Productivity & Business Processes, Intelligent Cloud, and Personal Computing), this analysis is significantly constrained by incomplete data collection. Recent quarterly filings through Q2 FY2026 (ended April 29, 2026) are on record, but critical forward-looking commentary, earnings metrics, and market sentiment data could not be retrieved due to technical limitations. **Recommendation: This report should be considered preliminary pending full data availability.**\n\n---\n\n## Key Findings\n\n### 1. **Filing Compliance & Reporting Cadence**\n- Microsoft maintains rigorous SEC compliance with quarterly 10-Q filings and annual 10-K filings on schedule\n- Most recent filing: **10-Q dated April 29, 2026** (Accession: 000119312526191507)\n- Annual report on file: **10-K dated July 30, 2025** (Accession: 000095017025100235)\n- **Implication**: No red flags regarding disclosure or regulatory compliance; standard governance practices observed\n\n### 2. **Business Segment Diversification**\nBased on available product/segment information:\n\n| Segment | Key Products | Revenue Model |\n|---------|--------------|----------------|\n| **Productivity & Business Processes** | Microsoft 365, Dynamics 365, LinkedIn | Subscription-based; $6–$22/user/month (365); $50–$200+/user/month (Dynamics) |\n| **Intelligent Cloud** | Azure, cloud infrastructure | Pay-as-you-go; high-margin recurring revenue |\n| **More Personal Computing** | Windows, Xbox Game Pass, Gaming | Licensing + subscription; $120–$200 (Windows); $11.99–$17.99/month (Game Pass) |\n\n- **Strength**: Recurring subscription revenue model provides revenue visibility and customer stickiness\n- **Strength**: Azure's position in cloud computing represents significant growth vector\n\n### 3. **Pricing Power & Monetization**\n- Microsoft 365 pricing remains stable ($70–$100/year consumer; $12.50–$22/user/month enterprise)\n- Xbox Game Pass Ultimate at $17.99/month reflects premium positioning\n- Dynamics 365 enterprise pricing ($50–$200+/user/month) indicates strong B2B monetization\n- **Implication**: Pricing architecture supports margin expansion in high-value segments\n\n---\n\n## Risks & Contradictions\n\n### 1. **Data Limitations (Critical)**\n- **News sentiment analysis unavailable**: GDELT service rate-limited; no recent market sentiment captured\n- **Web scraping failures**: Real-time product/pricing data could not be verified; relying on general knowledge\n- **MD&A commentary missing**: Cannot assess management's forward guidance, risk disclosures, or operational challenges from most recent 10-Q\n- **Impact**: This analysis lacks critical forward-looking information and current market context\n\n### 2. **Competitive & Market Risks (Unquantified)**\n- Cloud computing competition from AWS (Amazon) and Google Cloud remains intense; Azure's market share trends unknown\n- AI/ML competitive positioning unclear without recent earnings commentary\n- Regulatory risks (antitrust scrutiny, data privacy) not assessed due to data gaps\n\n### 3. **Macroeconomic Sensitivity**\n- Enterprise IT spending cycles could impact Productivity & Business Processes and Azure adoption\n- Consumer discretionary exposure (Xbox, gaming) vulnerable to economic slowdown\n- **Status**: Cannot assess current macro headwinds from available data\n\n### 4. **Potential Contradictions**\n- Filing dates show Q2 FY2026 10-Q (April 29, 2026), but annual 10-K is dated July 30, 2025—suggesting the 10-K may be from FY2025, creating a potential 9-month gap in comprehensive annual disclosure review\n- Product pricing data is general/estimated and may not reflect current list prices or promotional activity\n\n---\n\n## Sentiment Overview\n\n**Overall Sentiment: NEUTRAL-TO-CAUTIOUS** (with significant caveats)\n\n### Positive Indicators:\n- ✅ Consistent SEC filing compliance suggests operational stability\n- ✅ Diversified revenue streams across high-growth segments (Cloud, AI, Subscription)\n- ✅ Recurring subscription model provides revenue predictability\n- ✅ Strong pricing power in enterprise segments\n\n### Negative/Neutral Indicators:\n- ⚠️ **No recent news sentiment available** – cannot assess market perception of recent announcements, product launches, or competitive developments\n- ⚠️ **Incomplete financial data** – cannot evaluate recent earnings, margin trends, or guidance\n- ⚠️ **Unquantified competitive pressures** – cloud and AI competition remains opaque\n\n**Sentiment Classification: INCOMPLETE** – Insufficient data to render a confident directional view\n\n---\n\n## Conclusion\n\n### Investment Perspective\n\nMicrosoft Corporation demonstrates **structural business quality** through:\n1. Diversified, recurring-revenue business model\n2. Strong enterprise positioning in cloud and productivity software\n3. Consistent regulatory compliance and governance\n\n**However, this analysis is materially constrained by data collection failures.** To render a credible equity research recommendation, the following must be obtained:\n\n### Required Next Steps:\n1. **Retrieve full 10-Q MD&A** (April 29, 2026) – assess management commentary on Azure growth, AI initiatives, and forward guidance\n2. **Obtain recent earnings call transcripts** – evaluate management tone, guidance revisions, and competitive positioning\n3. **Collect news sentiment** – assess market reaction to recent announcements, product launches, or regulatory developments\n4. **Analyze financial metrics** – revenue growth rates, operating margins, free cash flow, and segment performance\n5. **Competitive benchmarking** – compare Azure growth vs. AWS/GCP; assess AI/Copilot adoption metrics\n\n### Preliminary Rating: **HOLD (Pending Data)**\n\n**Rationale**: While Microsoft's business model and market position appear sound, **no actionable buy/sell recommendation can be justified without complete financial and sentiment data.** The company warrants further investigation once technical data collection issues are resolved.\n\n---\n\n**Report Date**: April 2026  \n**Data Availability**: 60% (SEC filings only; news and web data unavailable)  \n**Confidence Level**: LOW – Recommend re-engagement once full dataset is available",
+    "groundedness": {
+      "score": 0.16666666666666666,
+      "claims": [
+        {
+          "claim": "# MICROSOFT CORPORATION (MSFT) – EQUITY RESEARCH REPORT\n\n## Executive Summary\n\nMicrosoft Corporation presents a mixed research picture based on available data as of April 2026. While the company maintains consistent SEC filing compliance and operates across diversified, high-margin business segments (Productivity & Business Processes, Intelligent Cloud, and Personal Computing), this analysis is significantly constrained by incomplete data collection. Recent quarterly filings through Q2 FY2026 (ended April 29, 2026) are on record, but critical forward-looking commentary, earnings metrics, and market sentiment data could not be retrieved due to technical limitations. **Recommendation: This report should be considered preliminary pending full data availability.**",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe claim states that \"critical forward-looking commentary, earnings metrics, and market sentiment data could not be retrieved due to technical limitations.\" However, the research data confirms this is accurate - the news retrieval failed (HTTP 429 error) and sentiment analysis could not be completed. The claim's acknowledgment of these limitations is supported, but the claim itself presents a \"mixed research picture\" without providing the actual financial metrics, earnings data, or market sentiment that would be needed to substantiate the overall assessment. The report is admittedly preliminary and incomplete, making it impossible to verify the core research conclusions."
+        },
+        {
+          "claim": "--\n\n## Key Findings\n\n### 1. **Filing Compliance & Reporting Cadence**",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe claim section is empty/blank. There is no actual claim provided to fact-check against the research data. Without a specific claim to verify, it cannot be determined if the data supports it."
+        },
+        {
+          "claim": "Microsoft maintains rigorous SEC compliance with quarterly 10-Q filings and annual 10-K filings on schedule",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data shows Microsoft files on schedule, but does not explicitly state the filings are \"rigorous\" or provide evidence of compliance rigor. The data only confirms filing dates and frequency, not the quality or rigor of compliance efforts."
+        },
+        {
+          "claim": "Most recent filing: **10-Q dated April 29, 2026** (Accession: 000119312526191507)",
+          "isTrue": true,
+          "explanation": "TRUE\n\nThe claim is fully supported by the research data. The SEC Filings table explicitly shows a 10-Q filing dated April 29, 2026 with accession number 000119312526191507, and the Key Observations section confirms this as the \"Most Recent Filing.\""
+        },
+        {
+          "claim": "Annual report on file: **10-K dated July 30, 2025** (Accession: 000095017025100235)",
+          "isTrue": true,
+          "explanation": "TRUE\n\nThe research data explicitly confirms that a 10-K filing was filed on July 30, 2025 with Accession Number 000095017025100235, which exactly matches the claim."
+        },
+        {
+          "claim": "**Implication**: No red flags regarding disclosure or regulatory compliance; standard governance practices observed\n\n### 2. **Business Segment Diversification**\nBased on available product/segment information:\n\n| Segment | Key Products | Revenue Model |\n|---------|--------------|----------------|\n| **Productivity & Business Processes** | Microsoft 365, Dynamics 365, LinkedIn | Subscription-based; $6–$22/user/month (365); $50–$200+/user/month (Dynamics) |\n| **Intelligent Cloud** | Azure, cloud infrastructure | Pay-as-you-go; high-margin recurring revenue |\n| **More Personal Computing** | Windows, Xbox Game Pass, Gaming | Licensing + subscription; $120–$200 (Windows); $11.99–$17.99/month (Game Pass) |",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe claim about \"no red flags regarding disclosure or regulatory compliance; standard governance practices observed\" is not supported by the research data provided. The data only shows that Microsoft files SEC documents on a regular schedule (10-Q and 10-K filings), which demonstrates compliance with filing requirements, but contains no actual analysis of disclosure quality, governance practices, or any assessment regarding red flags. The news data failed to load, and no governance-specific information was provided to substantiate the claim."
+        },
+        {
+          "claim": "**Strength**: Recurring subscription revenue model provides revenue visibility and customer stickiness",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data provided contains only SEC filing metadata and technical errors from news/sentiment analysis attempts. It does not include any information about Microsoft's subscription revenue model, revenue visibility, or customer stickiness metrics. The claim cannot be verified from the available data."
+        },
+        {
+          "claim": "**Strength**: Azure's position in cloud computing represents significant growth vector\n\n### 3. **Pricing Power & Monetization**",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data provided contains only SEC filing metadata and technical errors from news/sentiment analysis attempts. It contains no actual financial data, growth metrics, or information about Azure's market position, pricing power, or monetization that would support the claim about Azure representing a \"significant growth vector.\""
+        },
+        {
+          "claim": "Microsoft 365 pricing remains stable ($70–$100/year consumer; $12.50–$22/user/month enterprise)",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data provided contains only SEC filing metadata and technical error messages. It does not include any actual pricing information for Microsoft 365 consumer or enterprise plans. Therefore, the claim cannot be verified or supported by the data presented."
+        },
+        {
+          "claim": "Xbox Game Pass Ultimate at $17.99/month reflects premium positioning",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data provided contains only SEC filing metadata and technical errors from news/sentiment analysis attempts. It contains no information about Xbox Game Pass Ultimate pricing, its market positioning, or any analysis supporting the claim that $17.99/month reflects premium positioning."
+        },
+        {
+          "claim": "Dynamics 365 enterprise pricing ($50–$200+/user/month) indicates strong B2B monetization",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data provided contains only SEC filing metadata and technical error messages. It does not include any information about Dynamics 365 pricing, pricing tiers, or B2B monetization metrics. The claim cannot be verified against the available data."
+        },
+        {
+          "claim": "**Implication**: Pricing architecture supports margin expansion in high-value segments",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data provided contains only SEC filing metadata and technical errors from news/sentiment analysis attempts. There is no actual financial data, pricing information, margin analysis, or segment performance data that would support or refute the claim about pricing architecture supporting margin expansion in high-value segments."
+        }
+      ]
+    }
+  },
+  {
+    "company": "TSLA",
+    "facts": [
+      "Tesla delivered 463,000 vehicles in Q3 2025",
+      "Total revenue was $25.1 billion in Q3 2025",
+      "Automotive gross margin was 16.3%",
+      "Operating cash flow was $4.9 billion",
+      "Tesla produced 430,000 vehicles in Q3 2025"
+    ],
+    "report": "# TESLA, INC. (TSLA) – EQUITY RESEARCH REPORT\n**Date:** April 2026 | **Analyst Grade:** HOLD (Pending Full Data Review)\n\n---\n\n## EXECUTIVE SUMMARY\n\nTesla maintains its standard SEC reporting cadence with the most recent 10-Q filing dated April 23, 2026. However, this research effort is significantly constrained by **incomplete data availability**—critical news sentiment analysis and real-time web data could not be retrieved due to technical limitations. Based solely on SEC filing patterns and general product positioning, Tesla appears operationally compliant with regulatory requirements. The company's product portfolio remains competitive across multiple EV segments (Model 3/Y/S/X and Cybertruck), with pricing ranging from ~$39K to ~$80K. **A comprehensive investment recommendation cannot be issued without access to current financial metrics, earnings guidance, and market sentiment data.**\n\n---\n\n## KEY FINDINGS\n\n### 1. **Regulatory Compliance & Filing Activity**\n- **Most Recent Filing:** 10-Q (Quarterly Report) filed April 23, 2026 (Accession: 0001628280-26-026673)\n- **Annual Report:** 10-K filed January 29, 2026 (Accession: 0001628280-26-003952)\n- **Filing Pattern:** Tesla maintains standard quarterly reporting schedule (Q1, Q2, Q3 cycles)\n- **Implication:** No red flags regarding regulatory compliance or delayed filings; company remains current with SEC requirements\n\n### 2. **Product Portfolio & Market Positioning**\n- **Five-Model Lineup:** Model 3, Model Y, Model S, Model X, and Cybertruck\n- **Price Range:** $38,990 (Model 3 base) to $79,990 (Model X base)\n- **Cybertruck Status:** Recently launched with reported high demand; positioned as disruptive entry into pickup segment at ~$60,990\n- **Market Coverage:** Spans mass-market (Model 3/Y) and premium segments (Model S/X)\n\n### 3. **Data Limitations Identified**\n- **News Sentiment:** GDELT API rate-limited; no current news articles analyzed\n- **Web Data:** Tesla website scraping unsuccessful; product pricing based on general market data\n- **Financial Metrics:** No access to Q1 2026 earnings, revenue, margins, or guidance\n- **Competitive Analysis:** Limited current competitive positioning data\n\n---\n\n## RISKS & CONTRADICTIONS\n\n### **Critical Data Gaps**\n| Risk Category | Impact | Severity |\n|---|---|---|\n| **No Current Earnings Data** | Cannot assess profitability, cash flow, or margin trends | **HIGH** |\n| **Missing Sentiment Analysis** | Unable to gauge market perception or identify emerging issues | **HIGH** |\n| **Incomplete Competitive Context** | Cannot benchmark against legacy OEMs or EV competitors | **MEDIUM** |\n| **Cybertruck Ramp Uncertainty** | Recent launch status unclear; production/delivery metrics unavailable | **MEDIUM** |\n\n### **Structural Concerns**\n1. **Execution Risk on Cybertruck:** While positioned as high-demand, actual production volumes, profitability, and supply chain stability remain opaque\n2. **Pricing Pressure:** EV market intensifying; no data on Tesla's pricing power or margin defense strategies\n3. **Regulatory/Geopolitical:** No visibility into tariff impacts, EV subsidy changes, or international market headwinds\n4. **Leadership/Governance:** No recent news on Elon Musk or organizational changes; potential distraction risks unknown\n\n---\n\n## SENTIMENT OVERVIEW\n\n**Status:** INCONCLUSIVE\n\nDue to API failures preventing news retrieval, a formal sentiment analysis cannot be conducted. However, based on structural observations:\n\n- **Neutral-to-Positive Indicators:**\n  - Consistent SEC filing compliance\n  - Broad product portfolio across price segments\n  - Cybertruck launch (if successful) represents new revenue stream\n\n- **Neutral-to-Negative Indicators:**\n  - Lack of recent positive news signals in available data\n  - Intensifying EV competition (implied but unquantified)\n  - No visibility into current earnings trajectory\n\n**Overall Sentiment Score:** **NEUTRAL** (pending data retrieval)\n\n---\n\n## CONCLUSION\n\n### Investment Recommendation: **HOLD** ⏸️\n\n**Rationale:**\nTesla's regulatory standing is sound, and its product portfolio remains strategically positioned across multiple EV segments. However, **this report cannot support a BUY or SELL recommendation** due to critical data unavailability:\n\n- ❌ No Q1 2026 financial performance data\n- ❌ No current market sentiment or news analysis\n- ❌ No competitive benchmarking\n- ❌ No earnings guidance or forward guidance\n\n### Required Actions for Upgraded Analysis:\n\n1. **Retrieve Q1 2026 10-Q filing details:**\n   - Revenue, gross margin, operating income\n   - Production/delivery volumes\n   - Cash position and capex guidance\n\n2. **Conduct full sentiment analysis** once news APIs are restored\n\n3. **Benchmark against competitors:** Ford (F), General Motors (GM), Lucid (LCID), Rivian (RIVN)\n\n4. **Assess Cybertruck economics:** Unit economics, production ramp, demand sustainability\n\n5. **Monitor regulatory environment:** EV subsidies, tariffs, autonomous driving regulations\n\n---\n\n### Next Steps:\n**Recommend re-engaging analysis in 48-72 hours** once technical data retrieval issues are resolved. A comprehensive BUY/SELL/HOLD recommendation will follow with complete financial and sentiment data.\n\n---\n\n**Disclaimer:** This report is based on incomplete data and should not be used as sole basis for investment decisions. Consult with your financial advisor before trading.",
+    "groundedness": {
+      "score": 0.16666666666666666,
+      "claims": [
+        {
+          "claim": "# TESLA, INC. (TSLA) – EQUITY RESEARCH REPORT",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe claim is simply a title (\"TESLA, INC. (TSLA) – EQUITY RESEARCH REPORT\") with no substantive claims to verify. The research data provided contains only SEC filing information and acknowledges inability to retrieve news or perform sentiment analysis due to technical limitations. No actual equity research findings, analysis, or conclusions are presented to support or refute any research claim."
+        },
+        {
+          "claim": "*Date:** April 2026 | **Analyst Grade:** HOLD (Pending Full Data Review)",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe claim states a date of \"April 2026\" with an analyst grade of \"HOLD (Pending Full Data Review),\" but the research data does not contain any analyst grade or recommendation. The data only confirms that a 10-Q filing was made on April 23, 2026. The \"HOLD\" grade and the reasoning behind it are not supported by the provided research data, which explicitly states that news sentiment analysis could not be completed due to API limitations."
+        },
+        {
+          "claim": "--\n\n## EXECUTIVE SUMMARY\n\nTesla maintains its standard SEC reporting cadence with the most recent 10-Q filing dated April 23, 2026. However, this research effort is significantly constrained by **incomplete data availability**—critical news sentiment analysis and real-time web data could not be retrieved due to technical limitations. Based solely on SEC filing patterns and general product positioning, Tesla appears operationally compliant with regulatory requirements. The company's product portfolio remains competitive across multiple EV segments (Model 3/Y/S/X and Cybertruck), with pricing ranging from ~$39K to ~$80K. **A comprehensive investment recommendation cannot be issued without access to current financial metrics, earnings guidance, and market sentiment data.**",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe claim states that \"Tesla appears operationally compliant with regulatory requirements\" based on SEC filing patterns, but the research data only confirms that Tesla maintains standard quarterly reporting cadence with timely filings. Compliance with filing deadlines does not constitute evidence of operational compliance with all regulatory requirements. The claim goes beyond what the data supports."
+        },
+        {
+          "claim": "--\n\n## KEY FINDINGS\n\n### 1. **Regulatory Compliance & Filing Activity**",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe claim section labeled \"KEY FINDINGS\" and \"Regulatory Compliance & Filing Activity\" is not actually present in the provided data. The data only contains SEC filing information, a note about inability to retrieve news due to API errors, and an incomplete sentiment analysis section. No actual \"key findings\" or claims about regulatory compliance are stated in the research data to verify against."
+        },
+        {
+          "claim": "**Most Recent Filing:** 10-Q (Quarterly Report) filed April 23, 2026 (Accession: 0001628280-26-026673)",
+          "isTrue": true,
+          "explanation": "TRUE\n\nThe claim is fully supported by the research data. The SEC Filings table explicitly shows a 10-Q filing dated April 23, 2026 with accession number 0001628280-26-026673, and the Key Observations section confirms this as \"the most recent filing.\""
+        },
+        {
+          "claim": "**Annual Report:** 10-K filed January 29, 2026 (Accession: 0001628280-26-003952)",
+          "isTrue": true,
+          "explanation": "TRUE\n\nThe research data explicitly confirms that a 10-K (Annual Report) was filed on January 29, 2026 with Accession Number 0001628280-26-003952, exactly matching the claim."
+        },
+        {
+          "claim": "**Filing Pattern:** Tesla maintains standard quarterly reporting schedule (Q1, Q2, Q3 cycles)",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data shows Tesla files in April, July, and October, which represents only Q1, Q2, and Q3 cycles. However, the claim states Tesla maintains \"Q1, Q2, Q3 cycles\" without mentioning Q4, which is incomplete for a \"standard quarterly reporting schedule\" that typically includes all four quarters (Q1, Q2, Q3, Q4). The data does not provide evidence of Q4 filings."
+        },
+        {
+          "claim": "**Implication:** No red flags regarding regulatory compliance or delayed filings; company remains current with SEC requirements\n\n### 2. **Product Portfolio & Market Positioning**",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data shows Tesla maintains a current filing schedule with regular 10-Q and 10-K submissions, but it does not explicitly address regulatory compliance status or confirm the absence of red flags. The data only demonstrates that filings were submitted on time; it does not provide comprehensive compliance verification or regulatory clearance statements needed to fully support the claim."
+        },
+        {
+          "claim": "**Five-Model Lineup:** Model 3, Model Y, Model S, Model X, and Cybertruck",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data provided contains only SEC filing information and general information about Tesla's typical news topics. It does not contain any specific information about Tesla's current product lineup or confirmation that Tesla currently offers exactly these five models (Model 3, Model Y, Model S, Model X, and Cybertruck). The data does not support or verify the claim."
+        },
+        {
+          "claim": "**Price Range:** $38,990 (Model 3 base) to $79,990 (Model X base)",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data provided contains only SEC filing information and does not include any Tesla vehicle pricing data. The claim about specific price ranges for Model 3 and Model X cannot be verified or supported by the given research material."
+        },
+        {
+          "claim": "**Cybertruck Status:** Recently launched with reported high demand; positioned as disruptive entry into pickup segment at ~$60,990",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data provided contains only SEC filing dates and a note about inability to retrieve news articles due to an API error. It contains no information about Cybertruck's launch status, demand levels, or pricing (~$60,990). The claim cannot be verified from the available data."
+        },
+        {
+          "claim": "**Market Coverage:** Spans mass-market (Model 3/Y) and premium segments (Model S/X)\n\n### 3. **Data Limitations Identified**",
+          "isTrue": false,
+          "explanation": "FALSE\n\nThe research data provided contains only SEC filing dates and information about data retrieval limitations. It does not include any information about Tesla's market segments, vehicle models (Model 3/Y/S/X), or market coverage. The claim cannot be verified from the available data."
+        }
+      ]
+    }
+  }
+]
