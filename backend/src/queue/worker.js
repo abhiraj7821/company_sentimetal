@@ -1,86 +1,92 @@
 // src/queue/worker.js
 import { Worker } from "bullmq";
-import { connection } from "./connection.js";
-import { buildGraph } from "../graph/buildGraph.js";
+import { Command } from "@langchain/langgraph";
+import { redisConnection } from "./researchQueue.js";
+import { runGraphAndProject } from "../graph/streamHandlers.js";
+import { updateRun } from "../graph/runStore.js";
 import logger from "../lib/logger.js";
-import { researchEvents } from "./events.js"; // new import
 
-// ... keep the processor function
+/**
+ * Translates the frontend's POST /research body (§1 of the API contract)
+ * into GraphAnnotation's initial state shape. This is the one place that
+ * knows about both shapes, kept separate from projector.js (which handles
+ * the reverse direction: graph state -> contract JSON).
+ */
+function mapFormDataToGraphState(formData) {
+  const tickerMatch = formData?.researchTarget?.match(/\(([^)]+)\)/);
+  const company = tickerMatch ? tickerMatch[1] : formData?.researchTarget || "";
 
-async function processor(job) {
-  const { company, task_queue, thread_id, resume } = job.data;
+  const tasks = [];
+  if (formData?.dataSources?.secFilings) tasks.push("filing");
+  if (formData?.dataSources?.newsPress) tasks.push("news");
+  if (formData?.dataSources?.marketSentiment) tasks.push("sentiment");
+  if (formData?.dataSources?.webCompetitor) tasks.push("web_scout");
 
-  const graph = await buildGraph();
-  const threadId = thread_id || uuidv4();
-  const config = { configurable: { thread_id: threadId } };
-
-  // Helper to emit progress with jobId
-  const emitProgress = (progress) => {
-    job.updateProgress(progress);
-    researchEvents.emit("progress", { jobId: job.id, ...progress });
-  };
-
-  if (resume) {
-    logger.info({ threadId }, "Resuming graph after human approval...");
-    await emitProgress({ status: "resuming", threadId });
-    const finalState = await graph.invoke(null, { ...config, resume });
-    await emitProgress({ status: "completed", threadId });
-    return {
-      threadId,
-      approval_status: finalState.approval_status,
-      draft_report: finalState.draft_report,
-    };
-  }
-
-  // Initial run
-  logger.info({ threadId, company }, "Starting new research run...");
-  await emitProgress({ status: "running", threadId, company });
-
-  const initialState = {
+  return {
     company,
-    task_queue: task_queue || ["filing", "news", "sentiment", "web_scout"],
+    task_queue:
+      tasks.length > 0 ? tasks : ["filing", "news", "sentiment", "web_scout"],
     messages: [],
   };
-
-  try {
-    const result = await graph.invoke(initialState, config);
-    await emitProgress({ status: "completed", threadId });
-    return {
-      threadId,
-      approval_status: result.approval_status,
-      draft_report: result.draft_report,
-    };
-  } catch (error) {
-    if (
-      error.name === "GraphInterrupt" ||
-      error.message?.includes("interrupt")
-    ) {
-      logger.info({ threadId }, "Graph paused for human approval.");
-      const interruptedState = error.state || {};
-      await emitProgress({ status: "awaiting_approval", threadId });
-      return {
-        threadId,
-        approval_status: interruptedState.approval_status,
-        aggregated_findings: interruptedState.aggregated_findings,
-        draft_report: interruptedState.draft_report,
-      };
-    }
-    logger.error({ error, threadId }, "Graph execution failed.");
-    await emitProgress({ status: "failed", threadId, error: error.message });
-    throw error;
-  }
 }
 
-// ... rest (Worker instantiation)
-const worker = new Worker("research", processor, {
-  connection,
-  concurrency: 1,
-});
-worker.on("completed", (job, result) => {
-  logger.info({ jobId: job.id, threadId: result?.threadId }, "Job completed");
-});
+/**
+ * BullMQ (unlike Bull v3) doesn't have per-job-name `.process(name, fn)`
+ * registration on a single queue — one Worker's processor function
+ * receives every job on the queue and switches on `job.name` instead.
+ * This replaces the pseudocode's two separate `worker.process(...)` calls.
+ */
+const worker = new Worker(
+  "research",
+  async (job) => {
+    const { runId } = job.data;
+
+    if (job.name === "run") {
+      const { formData } = job.data;
+      const initialState = mapFormDataToGraphState(formData);
+      updateRun(runId, { status: "running" });
+      await runGraphAndProject(runId, initialState);
+      return;
+    }
+
+    if (job.name === "resume") {
+      const { decision, comment } = job.data;
+      // Matches the shape humanApproval.js already expects:
+      // const { approved, feedback } = decision || {};
+      const resumeCommand = new Command({
+        resume: { approved: decision === "approved", feedback: comment },
+      });
+      await runGraphAndProject(runId, resumeCommand);
+      return;
+    }
+
+    logger.warn(
+      { jobName: job.name },
+      "Unknown job type received on research queue",
+    );
+  },
+  { connection: redisConnection },
+);
+
 worker.on("failed", (job, err) => {
-  logger.error({ jobId: job?.id, error: err }, "Job failed");
+  const runId = job?.data?.runId;
+  logger.error({ err, runId, jobName: job?.name }, "Research job failed");
+  if (runId) {
+    updateRun(runId, {
+      status: "failed",
+      finishedAt: new Date().toISOString(),
+      error: {
+        code: "AGENT_TOOL_ERROR",
+        agent: "unknown",
+        message: err?.message || String(err),
+        occurredAt: new Date().toISOString(),
+      },
+    });
+  }
 });
 
-export { worker };
+worker.on("error", (err) => {
+  logger.error({ err }, "Research worker error");
+});
+
+export default worker;

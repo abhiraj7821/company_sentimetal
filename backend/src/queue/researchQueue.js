@@ -1,10 +1,13 @@
 // src/queue/researchQueue.js
 import { Queue } from "bullmq";
-import { connection } from "./connection.js";
+import IORedis from "ioredis";
+import config from "../config/index.js";
 
-/**
- * BullMQ queue for background research runs.
- * Jobs are enqueued by the POST /research endpoint and processed
- * by the worker (worker.js).
- */
-export const researchQueue = new Queue("research", { connection });
+// BullMQ requires this option on the connection it's handed.
+export const redisConnection = new IORedis(config.redisUrl, {
+  maxRetriesPerRequest: null,
+});
+
+export const researchQueue = new Queue("research", {
+  connection: redisConnection,
+});

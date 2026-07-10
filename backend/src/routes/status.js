@@ -1,38 +1,46 @@
 // src/routes/status.js
-import express from "express";
-import { researchQueue } from "../queue/researchQueue.js";
-import logger from "../lib/logger.js";
+import { Router } from "express";
+import { getRun } from "../graph/runStore.js";
 
-const router = express.Router();
+const router = Router();
+
+// Rough heuristic for estimatedSecondsRemaining — doesn't need to be exact
+// per the routing doc, just directionally useful for a progress estimate.
+const AVG_SECONDS_PER_REMAINING_AGENT = 20;
 
 /**
- * GET /research/:jobId
- * Returns job status and current state snapshot.
+ * GET /research/:runId/status
+ * Pure read — never touches GraphAnnotation, only the run store.
  */
-router.get("/:jobId", async (req, res) => {
-  try {
-    const job = await researchQueue.getJob(req.params.jobId);
-    if (!job) {
-      return res.status(404).json({ error: "Job not found" });
-    }
-
-    const state = await job.getState();
-    const progress = await job.getProgress();
-    const result = job.returnvalue || null;
-
-    // Build response with useful fields
-    const response = {
-      jobId: job.id,
-      state,
-      progress,
-      result,
-      ...(progress?.threadId ? { threadId: progress.threadId } : {}),
-    };
-    return res.json(response);
-  } catch (err) {
-    logger.error({ err }, "Failed to get job status");
-    return res.status(500).json({ error: "Failed to get status" });
+router.get("/research/:runId/status", (req, res) => {
+  const run = getRun(req.params.runId);
+  if (!run) {
+    return res.status(404).json({
+      error: { code: "RUN_NOT_FOUND", message: "No run with that id." },
+    });
   }
+
+  const remainingAgents = Object.values(run.agents).filter(
+    (a) =>
+      a.status === "pending" ||
+      a.status === "in-progress" ||
+      a.status === "active",
+  ).length;
+
+  const isTerminal = run.status === "completed" || run.status === "failed";
+
+  res.json({
+    runId: run.runId,
+    status: run.status,
+    company: run.company,
+    progress: run.progress,
+    estimatedSecondsRemaining: isTerminal
+      ? 0
+      : remainingAgents * AVG_SECONDS_PER_REMAINING_AGENT,
+    agents: run.agents,
+    logs: run.logs,
+    ...(run.status === "failed" && run.error ? { error: run.error } : {}),
+  });
 });
 
 export default router;

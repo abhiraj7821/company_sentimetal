@@ -1,54 +1,52 @@
 // src/routes/approve.js
-import express from "express";
+import { Router } from "express";
+import { getRun, updateRun } from "../graph/runStore.js";
 import { researchQueue } from "../queue/researchQueue.js";
-import logger from "../lib/logger.js";
 
-const router = express.Router();
+const router = Router();
+
+const VALID_DECISIONS = ["approved", "changes_requested"];
 
 /**
- * POST /research/:jobId/approve
- * Body: { approved: boolean, feedback?: string }
- * Resumes the interrupted graph by enqueuing a resume job with the same thread_id.
+ * POST /research/:runId/approve
+ * Enqueues a RESUME job (not a new run) — worker.js's "resume" handler
+ * turns this into `new Command({ resume: {...} })` against the same
+ * thread_id, continuing the graph from its interrupt() checkpoint.
  */
-router.post("/:jobId/approve", async (req, res) => {
-  try {
-    const { approved, feedback } = req.body;
-    if (typeof approved !== "boolean") {
-      return res.status(400).json({ error: "approved (boolean) is required" });
-    }
-
-    const originalJob = await researchQueue.getJob(req.params.jobId);
-    if (!originalJob) {
-      return res.status(404).json({ error: "Original job not found" });
-    }
-
-    const progress = await originalJob.getProgress();
-    const threadId = progress?.threadId;
-    if (!threadId) {
-      return res
-        .status(400)
-        .json({ error: "No threadId found in original job progress" });
-    }
-
-    // Enqueue a new job with resume payload (same thread_id)
-    const resumeJob = await researchQueue.add("resume", {
-      thread_id: threadId,
-      resume: { approved, feedback: feedback || "" },
+router.post("/research/:runId/approve", async (req, res) => {
+  const { runId } = req.params;
+  const run = getRun(runId);
+  if (!run) {
+    return res.status(404).json({
+      error: { code: "RUN_NOT_FOUND", message: "No run with that id." },
     });
-
-    logger.info(
-      { resumeJobId: resumeJob.id, threadId, approved },
-      "Resume job enqueued",
-    );
-    return res.status(202).json({
-      jobId: resumeJob.id,
-      threadId,
-      status: "resume_pending",
-    });
-  } catch (err) {
-    logger.error({ err }, "Failed to approve");
-    return res.status(500).json({ error: "Approval failed" });
   }
+  if (run.status !== "awaiting_approval") {
+    return res.status(409).json({
+      runId,
+      status: run.status,
+      message: "Run is not currently awaiting approval.",
+    });
+  }
+
+  const { decision, comment } = req.body || {};
+  if (!VALID_DECISIONS.includes(decision)) {
+    return res.status(400).json({
+      error: {
+        code: "INVALID_DECISION",
+        message: `decision must be one of: ${VALID_DECISIONS.join(", ")}`,
+      },
+    });
+  }
+
+  updateRun(runId, { status: "running" }); // optimistic, matches the contract's response
+  await researchQueue.add("resume", {
+    runId,
+    decision,
+    comment: comment || null,
+  });
+
+  res.json({ runId, status: "running", approval_status: decision });
 });
 
 export default router;

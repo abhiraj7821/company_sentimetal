@@ -7,9 +7,11 @@ import { sentimentScorerTool } from "../../tools/sentimentScorer.js";
 import { classifyNewsTool } from "../../tools/classifyNews.js";
 
 const tools = [sentimentScorerTool, classifyNewsTool];
-const model = getLLM("claude-haiku-4-5-20251001", { temperature: 0 }).bindTools(
-  tools,
-);
+// TODO:
+// const model = getLLM("claude-haiku-4-5-20251001", { temperature: 0 }).bindTools(
+//   tools,
+// );
+const model = getLLM().bindTools(tools);
 
 function messagesOf(state) {
   return Array.isArray(state.messages) ? state.messages : [];

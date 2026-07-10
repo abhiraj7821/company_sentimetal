@@ -1,40 +1,52 @@
 // src/routes/stream.js
-import express from "express";
-import { researchEvents } from "../queue/events.js";
-import logger from "../lib/logger.js";
+import { Router } from "express";
+import { getRun, runEvents } from "../graph/runStore.js";
 
-const router = express.Router();
+const router = Router();
 
 /**
- * GET /research/:jobId/stream
- * Opens an SSE connection that pushes job progress updates.
+ * GET /research/:runId/stream (SSE)
+ * Sends the current run record immediately, then pushes the full record
+ * again every time runStore emits an update for this runId. No Redis
+ * pub/sub needed at this scale — see runStore.js's comment on `runEvents`.
  */
-router.get("/:jobId/stream", (req, res) => {
-  const jobId = req.params.jobId;
+router.get("/research/:runId/stream", (req, res) => {
+  const { runId } = req.params;
+  const run = getRun(runId);
+  if (!run) {
+    return res.status(404).json({
+      error: { code: "RUN_NOT_FOUND", message: "No run with that id." },
+    });
+  }
 
-  // SSE headers
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
     "Cache-Control": "no-cache",
     Connection: "keep-alive",
+    // Needed if the frontend dev server runs on a different origin.
+    "Access-Control-Allow-Origin": req.headers.origin || "*",
   });
+  res.flushHeaders?.();
 
-  // Send initial connection event
-  res.write(`data: ${JSON.stringify({ event: "connected", jobId })}\n\n`);
-
-  // Handler for progress events for this job
-  const handler = (progress) => {
-    if (progress.jobId === jobId) {
-      res.write(`data: ${JSON.stringify(progress)}\n\n`);
-    }
+  const send = (data) => {
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
   };
 
-  researchEvents.on("progress", handler);
+  send(run);
 
-  // Cleanup on client disconnect
+  const onUpdate = (updatedRun) => send(updatedRun);
+  runEvents.on(runId, onUpdate);
+
+  // Heartbeat keeps some proxies/load balancers from closing an idle SSE
+  // connection during long stretches between updates.
+  const heartbeat = setInterval(() => {
+    res.write(": heartbeat\n\n");
+  }, 20000);
+
   req.on("close", () => {
-    researchEvents.removeListener("progress", handler);
-    logger.info({ jobId }, "SSE client disconnected");
+    clearInterval(heartbeat);
+    runEvents.off(runId, onUpdate);
+    res.end();
   });
 });
 

@@ -35,8 +35,9 @@ function isApprovedVerdict(text) {
  */
 export async function critic(state) {
   logger.info("Critic reviewing draft report...");
-
-  const model = getLLM("claude-haiku-4-5-20251001", { temperature: 0 });
+  // TODO:
+  // const model = getLLM("claude-haiku-4-5-20251001", { temperature: 0 });
+  const model = getLLM();
   const draft = truncate(state.draft_report || "", MAX_DRAFT_CHARS);
   const sources = truncate(state.aggregated_findings || "", MAX_SOURCES_CHARS);
 

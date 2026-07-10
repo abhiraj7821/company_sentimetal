@@ -1,32 +1,39 @@
 // src/routes/research.js
-import express from "express";
+import { Router } from "express";
+import { v4 as uuidv4 } from "uuid";
+import { createRun } from "../graph/runStore.js";
 import { researchQueue } from "../queue/researchQueue.js";
 import logger from "../lib/logger.js";
 
-const router = express.Router();
+const router = Router();
 
 /**
  * POST /research
- * Body: { company, task_queue? }
- * Enqueues a new research job and returns jobId + threadId.
+ * Body: StartNewResearch's formData, unchanged (see §1 of the contract).
+ * Does NOT call the graph directly — enqueues a job and returns
+ * immediately so the request thread never blocks on a multi-minute run.
  */
-router.post("/", async (req, res) => {
+router.post("/research", async (req, res) => {
   try {
-    const { company, task_queue } = req.body;
-    if (!company) {
-      return res.status(400).json({ error: "company is required" });
-    }
+    const runId = uuidv4();
+    createRun(runId, req.body);
 
-    const job = await researchQueue.add("research", { company, task_queue });
-    logger.info({ jobId: job.id, company }, "Research job enqueued");
-    return res.status(202).json({
-      jobId: job.id,
-      threadId: job.id, // we can use job.id as thread_id if not provided elsewhere
-      status: "pending",
+    await researchQueue.add("run", { runId, formData: req.body });
+
+    res.status(202).json({
+      runId,
+      status: "queued",
+      pollUrl: `/research/${runId}/status`,
+      streamUrl: `/research/${runId}/stream`,
     });
   } catch (err) {
-    logger.error({ err }, "Failed to enqueue research job");
-    return res.status(500).json({ error: "Failed to start research" });
+    logger.error({ err }, "Failed to enqueue research run");
+    res.status(500).json({
+      error: {
+        code: "ENQUEUE_FAILED",
+        message: err.message || "Failed to start research run.",
+      },
+    });
   }
 });
 

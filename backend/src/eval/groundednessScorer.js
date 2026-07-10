@@ -24,7 +24,9 @@ function splitClaims(text) {
  * Returns true/false and a brief explanation.
  */
 async function judgeClaim(claim, sources) {
-  const model = getLLM("claude-haiku-4-5-20251001", { temperature: 0 });
+  // TODO:
+  // const model = getLLM("claude-haiku-4-5-20251001", { temperature: 0 });
+  const model = getLLM();
   const prompt = `
 You are a strict fact-checker. Given the following claim and the research data,
 determine if the claim is fully supported by the data.
