@@ -9,7 +9,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "api": "npx nodemon src/server.js",
-    "worker": "node src/queue/worker.js"
+    "start": "node src/server.js",
+    "worker": "node src/queue/worker.js",
+    "test:news": "node --input-type=module -e \"import { fetchNews } from './src/tools/newsApi.js'; console.log(await fetchNews.invoke({ query: process.argv[1] || 'Tesla' }));\"",
+    "test:news-debug": "node --input-type=module -e \"import { fetchNews } from './src/tools/newsApi.js'; console.log(await fetchNews.invoke({ query: process.argv[1] || 'Tesla', size: 10 }));\""
   },
   "dependencies": {
     "@langchain/anthropic": "^1.5.1",

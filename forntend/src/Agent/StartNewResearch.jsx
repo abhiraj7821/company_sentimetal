@@ -10,6 +10,7 @@ import {
   Check,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { startResearch } from "../lib/api.js";
 
 /* ───────────────────────────────────────────────────────────
    SentinelSwarm — Start New Research Screen
@@ -17,17 +18,18 @@ import { Link } from "react-router-dom";
    Style: Hand-Drawn / Sketchbook aesthetic
 
    WIRING:
-   - Accepts `onLaunch(formData)` from the parent flow controller.
-   - On submit, we simulate kicking off the API call, then hand the
-     form data up so the parent can switch to the SwarmInAction screen.
+   - Accepts `onLaunch({ formData, runId })` from the parent flow controller.
+   - On submit, calls POST /research (via lib/api.js), then hands the
+     form data + returned runId up so the parent can switch to the
+     SwarmInAction screen and start polling/streaming that run.
    ─────────────────────────────────────────────────────────── */
 
 export default function StartNewResearch({ onLaunch }) {
   const [formData, setFormData] = useState({
     researchTarget: "Apple Inc. (AAPL)",
     researchObjective:
-      "Provide a comprehensive competitive intelligence report covering Q1 2024 performance, recent news, market sentiment, and key competitor activities.",
-    timeRange: "q1-2024",
+      "Provide a comprehensive competitive intelligence report covering Q1 2026 performance, recent news, market sentiment, and key competitor activities.",
+    timeRange: "q1-2026",
     dataSources: {
       secFilings: true,
       newsPress: true,
@@ -38,6 +40,7 @@ export default function StartNewResearch({ onLaunch }) {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   // ── Design Token Helpers ──
   const paperBg = {
@@ -71,13 +74,23 @@ export default function StartNewResearch({ onLaunch }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitError(null);
     setIsSubmitting(true);
-    // Simulate kicking off the backend API call (POST /research)
-    await new Promise((resolve) => setTimeout(resolve, 900));
-    setIsSubmitting(false);
-    // Hand the form data up to the flow controller, which will
-    // switch to the SwarmInAction (live processing) screen.
-    if (onLaunch) onLaunch(formData);
+    try {
+      // Real API call — POST /research (see routes/research.js).
+      // Backend responds immediately with a runId once the job is queued.
+      const { runId } = await startResearch(formData);
+      // Hand the form data + runId up to the flow controller, which will
+      // switch to the SwarmInAction (live processing) screen and start
+      // polling/streaming that run.
+      if (onLaunch) onLaunch({ formData, runId });
+    } catch (err) {
+      setSubmitError(
+        err.message || "Couldn't reach the swarm. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -277,11 +290,11 @@ export default function StartNewResearch({ onLaunch }) {
                   fontFamily: "'Patrick Hand', cursive",
                 }}
               >
-                <option value="q1-2024">Q1 2024 (Jan 1 – Mar 31, 2024)</option>
-                <option value="q2-2024">Q2 2024 (Apr 1 – Jun 30, 2024)</option>
-                <option value="q3-2024">Q3 2024 (Jul 1 – Sep 30, 2024)</option>
-                <option value="q4-2024">Q4 2024 (Oct 1 – Dec 31, 2024)</option>
-                <option value="ytd-2024">Year to Date 2024</option>
+                <option value="q1-2026">Q1 2026 (Jan 1 – Mar 31, 2026)</option>
+                <option value="q2-2026">Q2 2026 (Apr 1 – Jun 30, 2026)</option>
+                <option value="q3-2025">Q3 2025 (Jul 1 – Sep 30, 2025)</option>
+                <option value="q4-2025">Q4 2025 (Oct 1 – Dec 31, 2025)</option>
+                <option value="ytd-2026">Year to Date 2026</option>
                 <option value="last-12m">Last 12 Months</option>
                 <option value="custom">Custom Range</option>
               </select>
@@ -489,6 +502,15 @@ export default function StartNewResearch({ onLaunch }) {
                 </>
               )}
             </button>
+
+            {submitError && (
+              <p
+                className="mt-4 text-lg text-[#ff4d4d] font-bold"
+                style={{ fontFamily: "'Kalam', cursive" }}
+              >
+                ⚠ {submitError}
+              </p>
+            )}
 
             <p className="mt-4 text-lg text-[#2d2d2d]/70">
               The agents will handle the rest!

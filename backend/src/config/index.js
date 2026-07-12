@@ -25,6 +25,9 @@ const config = {
   openaiApiKey: process.env.OPENAI_API_KEY,
   anthropicApiKey: process.env.ANTHROPIC_API_KEY,
 
+  // newsdata.io
+  newsdata_api_key: process.env.NEWSDATA_API_KEY,
+
   hfToken: process.env.HF_TOKEN,
 
   // External data APIs (free tiers)

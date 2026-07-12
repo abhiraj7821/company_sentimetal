@@ -21,39 +21,70 @@ import { Link } from "react-router-dom";
    Tech: React + Tailwind CSS
    Style: Hand-Drawn / Sketchbook aesthetic
 
-   WIRING:
-   - Accepts `reportData` (demo data built by SwarmInAction once the
-     simulated run finishes) and renders it instead of hardcoded values.
+   WIRING (real backend):
+   - Accepts `reportData` — the exact payload from
+     GET /research/:runId/report (see the API contract doc + routes/report.js),
+     handed down from SwarmInAction once the run completes.
+   - `stats.factAccuracy` arrives as a 0–1 float and `stats.runTimeSeconds`
+     as a number, so formatting (%, "12m 34s") happens here, client-side.
    - Accepts `onNewResearch()` — called when the user clicks
      "New Research", so the parent flow can switch back to the
      Start New Research screen.
    ─────────────────────────────────────────────────────────── */
 
 const DEFAULT_REPORT = {
-  companyName: "Apple Inc.",
-  fullTitle: "Apple Inc. – Q1 2024 Intelligence Report",
-  generatedAt: "May 27, 2024 at 10:32 AM",
+  company: { name: "Apple Inc.", ticker: "AAPL" },
+  title: "Apple Inc. – Q1 2024 Intelligence Report",
+  generatedAt: "2024-05-27T10:32:00Z",
   stats: {
     sourcesAnalyzed: 42,
     insightsFound: 128,
-    factAccuracy: "98.7%",
-    runTime: "12m 34s",
+    factAccuracy: 0.987,
+    runTimeSeconds: 754,
   },
-  reportSections: [
-    "Executive Summary",
-    "Q1 2024 Financial Highlights",
-    "Key Developments & News",
-    "Market Sentiment Analysis",
-    "Competitor Intelligence",
-    "Risks & Opportunities",
-    "Sources & References",
+  sections: [
+    { id: "executive_summary", title: "Executive Summary" },
+    { id: "financial_highlights", title: "Q1 2024 Financial Highlights" },
+    { id: "key_developments", title: "Key Developments & News" },
+    { id: "market_sentiment", title: "Market Sentiment Analysis" },
+    { id: "competitor_intelligence", title: "Competitor Intelligence" },
+    { id: "risks_opportunities", title: "Risks & Opportunities" },
+    { id: "sources_references", title: "Sources & References" },
   ],
+  downloadUrl: null,
 };
+
+function formatGeneratedAt(isoString) {
+  try {
+    return new Date(isoString).toLocaleString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  } catch {
+    return isoString;
+  }
+}
+
+function formatRunTime(totalSeconds) {
+  if (typeof totalSeconds !== "number") return totalSeconds;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = Math.round(totalSeconds % 60);
+  return `${minutes}m ${seconds}s`;
+}
+
+function formatFactAccuracy(value) {
+  if (typeof value !== "number") return value;
+  return `${(value * 100).toFixed(1)}%`;
+}
 
 export default function ResearchComplete({ reportData, onNewResearch }) {
   const report = reportData || DEFAULT_REPORT;
   const [rating, setRating] = useState(0);
   const [hoveredStar, setHoveredStar] = useState(0);
+  const [showFullReport, setShowFullReport] = useState(false);
 
   // ── Design Token Helpers ──
   const paperBg = {
@@ -75,7 +106,7 @@ export default function ResearchComplete({ reportData, onNewResearch }) {
   const shadowHard = { boxShadow: "4px 4px 0px 0px #2d2d2d" };
   const shadowHardSm = { boxShadow: "3px 3px 0px 0px #2d2d2d" };
 
-  const reportSections = report.reportSections;
+  const reportSections = report.sections || [];
 
   const stats = [
     {
@@ -90,12 +121,12 @@ export default function ResearchComplete({ reportData, onNewResearch }) {
     },
     {
       icon: <Smile className="w-6 h-6" strokeWidth={2.5} />,
-      value: report.stats.factAccuracy,
+      value: formatFactAccuracy(report.stats.factAccuracy),
       label: "Fact Accuracy",
     },
     {
       icon: <Clock className="w-6 h-6" strokeWidth={2.5} />,
-      value: report.stats.runTime,
+      value: formatRunTime(report.stats.runTimeSeconds),
       label: "Run Time",
     },
   ];
@@ -264,10 +295,12 @@ export default function ResearchComplete({ reportData, onNewResearch }) {
                 className="text-2xl font-bold text-[#2d2d2d] mb-1"
                 style={{ fontFamily: "'Kalam', cursive" }}
               >
-                {report.fullTitle}
+                {report.title}
               </h2>
               <div className="flex items-center gap-3 text-base text-[#2d2d2d]/60">
-                <span>Generated on {report.generatedAt}</span>
+                <span>
+                  Generated on {formatGeneratedAt(report.generatedAt)}
+                </span>
                 <span
                   className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 border-[2px] border-green-600 text-green-700 text-sm font-bold"
                   style={{ ...wobblySm }}
@@ -310,6 +343,7 @@ export default function ResearchComplete({ reportData, onNewResearch }) {
             ═══════════════════════════════════════════════════ */}
         <div className="flex flex-col sm:flex-row gap-4 mb-10">
           <button
+            onClick={() => setShowFullReport((v) => !v)}
             className="flex-1 px-6 py-4 bg-[#2d5da1] text-white text-xl font-bold border-[3px] border-[#2d2d2d] hover:bg-[#1e4a8a] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100 flex items-center justify-center gap-3"
             style={{ ...wobbly, ...shadowHard }}
             onMouseEnter={(e) =>
@@ -319,24 +353,64 @@ export default function ResearchComplete({ reportData, onNewResearch }) {
               (e.currentTarget.style.boxShadow = "4px 4px 0px 0px #2d2d2d")
             }
           >
-            VIEW FULL REPORT
+            {showFullReport ? "HIDE FULL REPORT" : "VIEW FULL REPORT"}
             <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
           </button>
 
-          <button
-            className="flex-1 px-6 py-4 bg-white text-[#2d2d2d] text-xl font-bold border-[3px] border-[#2d2d2d] hover:bg-[#e5e0d8] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100 flex items-center justify-center gap-3"
-            style={{ ...wobblyAlt, ...shadowHard }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.boxShadow = "2px 2px 0px 0px #2d2d2d")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.boxShadow = "4px 4px 0px 0px #2d2d2d")
-            }
-          >
-            <Download className="w-5 h-5" strokeWidth={2.5} />
-            DOWNLOAD PDF
-          </button>
+          {report.downloadUrl ? (
+            <a
+              href={report.downloadUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex-1 px-6 py-4 bg-white text-[#2d2d2d] text-xl font-bold border-[3px] border-[#2d2d2d] hover:bg-[#e5e0d8] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100 flex items-center justify-center gap-3"
+              style={{ ...wobblyAlt, ...shadowHard }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.boxShadow = "2px 2px 0px 0px #2d2d2d")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.boxShadow = "4px 4px 0px 0px #2d2d2d")
+              }
+            >
+              <Download className="w-5 h-5" strokeWidth={2.5} />
+              DOWNLOAD PDF
+            </a>
+          ) : (
+            <button
+              disabled
+              title="PDF not available for this run"
+              className="flex-1 px-6 py-4 bg-white text-[#2d2d2d]/40 text-xl font-bold border-[3px] border-[#2d2d2d]/30 cursor-not-allowed flex items-center justify-center gap-3"
+              style={{ ...wobblyAlt }}
+            >
+              <Download className="w-5 h-5" strokeWidth={2.5} />
+              DOWNLOAD PDF
+            </button>
+          )}
         </div>
+
+        {/* ═══════════════════════════════════════════════════
+            FULL REPORT (toggled) — renders section content
+            straight from GET /research/:runId/report
+            ═══════════════════════════════════════════════════ */}
+        {showFullReport && (
+          <div
+            className="bg-white border-[3px] border-[#2d2d2d] p-6 md:p-8 mb-10 space-y-6"
+            style={{ ...wobbly, ...shadowHard }}
+          >
+            {reportSections.map((section) => (
+              <div key={section.id || section.title}>
+                <h3
+                  className="text-xl font-bold text-[#2d2d2d] mb-1"
+                  style={{ fontFamily: "'Kalam', cursive" }}
+                >
+                  {section.title}
+                </h3>
+                <p className="text-lg text-[#2d2d2d]/80 leading-relaxed">
+                  {section.content || "No content for this section yet."}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* ═══════════════════════════════════════════════════
             WHAT'S INSIDE + STICKY NOTE
@@ -361,13 +435,13 @@ export default function ResearchComplete({ reportData, onNewResearch }) {
             </div>
 
             <div className="mt-4 space-y-3">
-              {reportSections.map((section, i) => (
+              {reportSections.map((section) => (
                 <div
-                  key={i}
+                  key={section.id || section.title}
                   className="flex items-center gap-3 text-lg text-[#2d2d2d]"
                 >
                   <span className="text-[#2d5da1] font-bold text-xl">✓</span>
-                  <span>{section}</span>
+                  <span>{section.title}</span>
                 </div>
               ))}
             </div>

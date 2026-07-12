@@ -14,21 +14,36 @@ import {
   Loader2,
   Sparkles,
   Activity,
+  AlertTriangle,
 } from "lucide-react";
+import {
+  subscribeToRunStream,
+  getRunStatus,
+  getRunReport,
+  approveRun,
+} from "../lib/api.js";
 
 /* ───────────────────────────────────────────────────────────
    SentinelSwarm — Swarm In Action (Live Processing Screen)
    Tech: React + Tailwind CSS
    Style: Hand-Drawn / Sketchbook aesthetic
 
-   WIRING:
-   - Accepts `formData` (from StartNewResearch) so the header/log can
-     reference what's actually being researched.
-   - Accepts `onComplete(demoReportData)` — called once the simulated
-     run finishes, handing demo report data up to the parent flow so
-     it can switch to the ResearchComplete screen.
-   - Accepts `onStop()` — called if the user clicks "Stop Run", so the
-     parent can send them back to the Start New Research screen.
+   WIRING (real backend):
+   - Accepts `runId` (returned by POST /research in StartNewResearch)
+     and `formData` (just for the "Researching <company>..." label).
+   - Opens an SSE connection to GET /research/:runId/stream and renders
+     whatever the server pushes — `agents`, `logs`, `progress` are
+     already shaped exactly like this component's local state used to
+     be, so no client-side remapping is needed (see the API contract
+     doc + routes/status.js's projector).
+   - Falls back to polling GET /research/:runId/status every 2s if the
+     SSE connection errors out (e.g. behind a proxy that buffers).
+   - status === "completed"  → fetch GET /research/:runId/report once,
+     then call `onComplete(reportPayload)`.
+   - status === "awaiting_approval" → show inline Approve / Request
+     Changes buttons that call POST /research/:runId/approve.
+   - status === "failed" → show the error and let the user go back via
+     `onStop()`.
    ─────────────────────────────────────────────────────────── */
 
 const AGENT_SEQUENCE = [
@@ -41,102 +56,117 @@ const AGENT_SEQUENCE = [
   "humanApproval",
 ];
 
-export default function SwarmInAction({ formData, onComplete, onStop }) {
+const INITIAL_AGENTS = {
+  supervisor: { status: "active", label: "Orchestrating tasks" },
+  filing: { status: "pending", label: "10-K / 10-Q" },
+  news: { status: "pending", label: "Collecting news" },
+  sentiment: { status: "pending", label: "Analyzing sentiment" },
+  webScout: { status: "pending", label: "Exploring web" },
+  critic: { status: "pending", label: "Verifying facts" },
+  reportWriter: { status: "pending", label: "Drafting report" },
+  humanApproval: { status: "pending", label: "Review & approve" },
+};
+
+export default function SwarmInAction({ formData, runId, onComplete, onStop }) {
   const companyLabel = formData?.researchTarget || "Apple Inc. (AAPL)";
 
-  const [progress, setProgress] = useState(4);
-  const [agentStatuses, setAgentStatuses] = useState({
-    supervisor: "active",
-    filing: "in-progress",
-    news: "pending",
-    sentiment: "pending",
-    webScout: "pending",
-    critic: "pending",
-    reportWriter: "pending",
-    humanApproval: "pending",
-  });
+  const [runStatus, setRunStatus] = useState("queued");
+  const [progress, setProgress] = useState(2);
+  const [agents, setAgents] = useState(INITIAL_AGENTS);
+  const [logs, setLogs] = useState([]);
+  const [estimatedSecondsRemaining, setEstimatedSecondsRemaining] =
+    useState(null);
+  const [runError, setRunError] = useState(null);
+  const [approvalSubmitting, setApprovalSubmitting] = useState(false);
 
-  const [logs, setLogs] = useState([
-    {
-      time: formatTime(new Date()),
-      agent: "Filing Agent",
-      action: `Extracting filings for ${companyLabel}...`,
-      status: "in-progress",
-    },
-  ]);
+  const hasFetchedReportRef = useRef(false);
+  const pollIntervalRef = useRef(null);
 
-  const hasCompletedRef = useRef(false);
-
-  function formatTime(d) {
-    return d.toTimeString().slice(0, 8);
-  }
-
-  function pushLog(agent, action, status) {
-    setLogs((prev) => [
-      ...prev,
-      { time: formatTime(new Date()), agent, action, status },
-    ]);
-  }
-
-  // Simulate progress + agent status advancement + completion
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (hasCompletedRef.current) return prev;
-        const next = Math.min(prev + 4 + Math.random() * 6, 100);
-
-        // Advance agent statuses roughly in step with progress
-        setAgentStatuses((prevStatuses) => {
-          const updated = { ...prevStatuses };
-          const stepSize = 100 / AGENT_SEQUENCE.length;
-          AGENT_SEQUENCE.forEach((key, i) => {
-            const threshold = stepSize * (i + 1);
-            if (next >= threshold && updated[key] !== "completed") {
-              updated[key] = "completed";
-              const labelMap = {
-                filing: ["Filing Agent", "10-Q extraction complete."],
-                news: ["News Agent", "Collected recent news articles."],
-                sentiment: ["Sentiment Agent", "Sentiment analysis complete."],
-                webScout: ["Web Scout Agent", "Competitor pages scanned."],
-                critic: [
-                  "Critic Agent",
-                  "Facts cross-checked, no contradictions found.",
-                ],
-                reportWriter: ["Report Writer", "Draft report compiled."],
-                humanApproval: [
-                  "Human Approval",
-                  "Auto-approved for demo run.",
-                ],
-              };
-              const [agentName, action] = labelMap[key];
-              pushLog(agentName, action, "completed");
-            } else if (
-              next >= threshold - stepSize &&
-              next < threshold &&
-              updated[key] === "pending"
-            ) {
-              updated[key] = "in-progress";
-            }
-          });
-          return updated;
+  const applyRunUpdate = (run) => {
+    if (!run) return;
+    setRunStatus(run.status);
+    if (typeof run.progress === "number") setProgress(run.progress);
+    if (run.agents) setAgents(run.agents);
+    if (run.logs) setLogs(run.logs);
+    if (typeof run.estimatedSecondsRemaining === "number") {
+      setEstimatedSecondsRemaining(run.estimatedSecondsRemaining);
+    }
+    if (run.status === "failed" && run.error) {
+      setRunError(run.error.message || "The run failed unexpectedly.");
+    }
+    if (run.status === "completed" && !hasFetchedReportRef.current) {
+      hasFetchedReportRef.current = true;
+      getRunReport(runId)
+        .then((report) => {
+          if (onComplete) onComplete(report);
+        })
+        .catch((err) => {
+          setRunError(err.message || "Couldn't load the finished report.");
         });
+    }
+  };
 
-        if (next >= 100 && !hasCompletedRef.current) {
-          hasCompletedRef.current = true;
-          clearInterval(interval);
-          // Give the UI a beat to show 100% before handing off
-          setTimeout(() => {
-            if (onComplete) onComplete(buildDemoReport(formData));
-          }, 700);
+  // Live updates: SSE first, polling fallback if the stream errors out.
+  useEffect(() => {
+    if (!runId) return;
+
+    let source = null;
+    let cancelled = false;
+
+    const startPollingFallback = () => {
+      if (pollIntervalRef.current) return; // already polling
+      pollIntervalRef.current = setInterval(async () => {
+        try {
+          const run = await getRunStatus(runId);
+          if (!cancelled) applyRunUpdate(run);
+          if (run.status === "completed" || run.status === "failed") {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+          }
+        } catch (err) {
+          if (!cancelled)
+            setRunError(err.message || "Lost connection to the swarm.");
         }
+      }, 2000);
+    };
 
-        return next;
-      });
-    }, 900);
+    try {
+      source = subscribeToRunStream(
+        runId,
+        (run) => {
+          if (!cancelled) applyRunUpdate(run);
+        },
+        () => {
+          // SSE dropped — switch to polling instead of failing silently.
+          if (source) source.close();
+          startPollingFallback();
+        },
+      );
+    } catch {
+      // EventSource unsupported / blocked — go straight to polling.
+      startPollingFallback();
+    }
 
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      if (source) source.close();
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [runId]);
+
+  const handleApproval = async (decision) => {
+    setApprovalSubmitting(true);
+    try {
+      await approveRun(runId, decision);
+      // The next SSE/poll update will reflect the new status; no local
+      // state mutation needed here.
+    } catch (err) {
+      setRunError(err.message || "Couldn't submit your decision.");
+    } finally {
+      setApprovalSubmitting(false);
+    }
+  };
 
   // ── Design Token Helpers ──
   const paperBg = {
@@ -157,6 +187,10 @@ export default function SwarmInAction({ formData, onComplete, onStop }) {
 
   const shadowHard = { boxShadow: "4px 4px 0px 0px #2d2d2d" };
   const shadowHardSm = { boxShadow: "3px 3px 0px 0px #2d2d2d" };
+
+  // agents[key] is `{ status, label }` (see routes/status.js's projector);
+  // this just guards against a key being briefly absent on the first tick.
+  const statusOf = (key) => agents[key]?.status || "pending";
 
   const statusConfig = {
     completed: {
@@ -355,29 +389,29 @@ export default function SwarmInAction({ formData, onComplete, onStop }) {
                   key: "filing",
                   icon: <FileText className="w-6 h-6" strokeWidth={2.5} />,
                   label: "FILING AGENT",
-                  sub: "10-K / 10-Q",
-                  status: agentStatuses.filing,
+                  sub: agents.filing?.label || "10-K / 10-Q",
+                  status: statusOf("filing"),
                 },
                 {
                   key: "news",
                   icon: <Newspaper className="w-6 h-6" strokeWidth={2.5} />,
                   label: "NEWS AGENT",
-                  sub: "Collecting news",
-                  status: agentStatuses.news,
+                  sub: agents.news?.label || "Collecting news",
+                  status: statusOf("news"),
                 },
                 {
                   key: "sentiment",
                   icon: <Smile className="w-6 h-6" strokeWidth={2.5} />,
                   label: "SENTIMENT AGENT",
-                  sub: "Analyzing sentiment",
-                  status: agentStatuses.sentiment,
+                  sub: agents.sentiment?.label || "Analyzing sentiment",
+                  status: statusOf("sentiment"),
                 },
                 {
                   key: "webScout",
                   icon: <Globe className="w-6 h-6" strokeWidth={2.5} />,
                   label: "WEB SCOUT AGENT",
-                  sub: "Exploring web",
-                  status: agentStatuses.webScout,
+                  sub: agents.webScout?.label || "Exploring web",
+                  status: statusOf("webScout"),
                 },
               ].map((agent) => (
                 <div
@@ -452,7 +486,7 @@ export default function SwarmInAction({ formData, onComplete, onStop }) {
             {/* Critic Agent */}
             <div className="flex justify-center mb-4">
               <div
-                className={`px-6 py-3 bg-white border-[3px] border-[#2d2d2d] text-center relative ${agentStatuses.critic === "in-progress" ? "bg-[#2d5da1]/5" : ""}`}
+                className={`px-6 py-3 bg-white border-[3px] border-[#2d2d2d] text-center relative ${statusOf("critic") === "in-progress" ? "bg-[#2d5da1]/5" : ""}`}
                 style={{ ...wobblySm, ...shadowHardSm }}
               >
                 <div className="flex items-center justify-center gap-2 mb-1">
@@ -471,10 +505,10 @@ export default function SwarmInAction({ formData, onComplete, onStop }) {
                   Verifying facts
                 </div>
                 <div
-                  className={`flex items-center justify-center gap-1 text-xs font-bold ${statusConfig[agentStatuses.critic].color}`}
+                  className={`flex items-center justify-center gap-1 text-xs font-bold ${statusConfig[statusOf("critic")].color}`}
                 >
-                  {statusConfig[agentStatuses.critic].icon}
-                  {getStatusLabel(agentStatuses.critic)}
+                  {statusConfig[statusOf("critic")].icon}
+                  {getStatusLabel(statusOf("critic"))}
                 </div>
               </div>
             </div>
@@ -495,7 +529,7 @@ export default function SwarmInAction({ formData, onComplete, onStop }) {
             {/* Report Writer */}
             <div className="flex justify-center mb-4">
               <div
-                className={`px-6 py-3 bg-white border-[3px] border-[#2d2d2d] text-center relative ${agentStatuses.reportWriter === "in-progress" ? "bg-[#2d5da1]/5" : ""}`}
+                className={`px-6 py-3 bg-white border-[3px] border-[#2d2d2d] text-center relative ${statusOf("reportWriter") === "in-progress" ? "bg-[#2d5da1]/5" : ""}`}
                 style={{ ...wobblySm, ...shadowHardSm }}
               >
                 <div className="flex items-center justify-center gap-2 mb-1">
@@ -514,10 +548,10 @@ export default function SwarmInAction({ formData, onComplete, onStop }) {
                   Drafting report
                 </div>
                 <div
-                  className={`flex items-center justify-center gap-1 text-xs font-bold ${statusConfig[agentStatuses.reportWriter].color}`}
+                  className={`flex items-center justify-center gap-1 text-xs font-bold ${statusConfig[statusOf("reportWriter")].color}`}
                 >
-                  {statusConfig[agentStatuses.reportWriter].icon}
-                  {getStatusLabel(agentStatuses.reportWriter)}
+                  {statusConfig[statusOf("reportWriter")].icon}
+                  {getStatusLabel(statusOf("reportWriter"))}
                 </div>
               </div>
             </div>
@@ -538,7 +572,7 @@ export default function SwarmInAction({ formData, onComplete, onStop }) {
             {/* Human Approval */}
             <div className="flex justify-center">
               <div
-                className={`px-6 py-3 bg-[#fff9c4] border-[3px] border-[#2d2d2d] text-center relative ${agentStatuses.humanApproval === "pending" ? "opacity-70" : ""}`}
+                className={`px-6 py-3 bg-[#fff9c4] border-[3px] border-[#2d2d2d] text-center relative ${statusOf("humanApproval") === "pending" ? "opacity-70" : ""}`}
                 style={{ ...wobblyAlt, ...shadowHardSm }}
               >
                 <div className="flex items-center justify-center gap-2 mb-1">
@@ -557,10 +591,10 @@ export default function SwarmInAction({ formData, onComplete, onStop }) {
                   Review & approve
                 </div>
                 <div
-                  className={`flex items-center justify-center gap-1 text-xs font-bold ${statusConfig[agentStatuses.humanApproval].color}`}
+                  className={`flex items-center justify-center gap-1 text-xs font-bold ${statusConfig[statusOf("humanApproval")].color}`}
                 >
-                  {statusConfig[agentStatuses.humanApproval].icon}
-                  {getStatusLabel(agentStatuses.humanApproval)}
+                  {statusConfig[statusOf("humanApproval")].icon}
+                  {getStatusLabel(statusOf("humanApproval"))}
                 </div>
               </div>
             </div>
@@ -745,57 +779,104 @@ export default function SwarmInAction({ formData, onComplete, onStop }) {
 
             {/* Estimated time */}
             <p className="text-lg text-[#2d2d2d]/70">
-              {progress >= 100 ? (
+              {runStatus === "completed" ? (
                 <>Wrapping up — handing off to your report...</>
-              ) : (
+              ) : estimatedSecondsRemaining != null ? (
                 <>
                   Estimated time remaining:{" "}
                   <span className="font-bold text-[#2d2d2d]">
-                    {Math.max(1, Math.round((100 - progress) / 12))}-
-                    {Math.max(2, Math.round((100 - progress) / 8))} minutes
+                    {formatSeconds(estimatedSecondsRemaining)}
                   </span>
                 </>
+              ) : (
+                <>Working...</>
               )}
             </p>
           </div>
         </div>
+
+        {/* ═══════════════════════════════════════════════════
+            HUMAN APPROVAL (only shown when the graph is paused
+            at the human_approval interrupt())
+            ═══════════════════════════════════════════════════ */}
+        {runStatus === "awaiting_approval" && (
+          <div
+            className="mt-8 bg-[#fff9c4] border-[3px] border-[#2d2d2d] p-6"
+            style={{ ...wobblyAlt, ...shadowHard }}
+          >
+            <h2
+              className="text-2xl font-bold text-[#2d2d2d] mb-2"
+              style={{ fontFamily: "'Kalam', cursive" }}
+            >
+              WAITING ON YOUR REVIEW
+            </h2>
+            <p className="text-lg text-[#2d2d2d]/80 mb-4">
+              The draft report passed the critic's fact-check and is ready for
+              your sign-off before publishing.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                disabled={approvalSubmitting}
+                onClick={() => handleApproval("approved")}
+                className="px-6 py-3 bg-[#2d5da1] text-white text-lg font-bold border-[3px] border-[#2d2d2d] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100 disabled:opacity-60"
+                style={{ ...wobblySm, ...shadowHardSm }}
+              >
+                {approvalSubmitting ? "Submitting..." : "Approve & Publish"}
+              </button>
+              <button
+                disabled={approvalSubmitting}
+                onClick={() => handleApproval("changes_requested")}
+                className="px-6 py-3 bg-white text-[#2d2d2d] text-lg font-bold border-[3px] border-[#2d2d2d] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100 disabled:opacity-60"
+                style={{ ...wobblySm, ...shadowHardSm }}
+              >
+                Request Changes
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════
+            FAILURE STATE
+            ═══════════════════════════════════════════════════ */}
+        {(runStatus === "failed" || runError) && (
+          <div
+            className="mt-8 bg-white border-[3px] border-[#ff4d4d] p-6 flex items-start gap-4"
+            style={{ ...wobblyAlt, ...shadowHard }}
+          >
+            <AlertTriangle
+              className="w-8 h-8 text-[#ff4d4d] shrink-0"
+              strokeWidth={2.5}
+            />
+            <div className="flex-1">
+              <h2
+                className="text-xl font-bold text-[#2d2d2d] mb-1"
+                style={{ fontFamily: "'Kalam', cursive" }}
+              >
+                Something went wrong
+              </h2>
+              <p className="text-lg text-[#2d2d2d]/70 mb-4">
+                {runError || "The run failed unexpectedly. Please try again."}
+              </p>
+              <button
+                onClick={() => onStop && onStop()}
+                className="px-5 py-2.5 bg-white text-[#2d2d2d] text-base font-bold border-[3px] border-[#2d2d2d] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
+                style={{ ...wobblySm, ...shadowHardSm }}
+              >
+                Back to Start
+              </button>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
 }
 
 /* ───────────────────────────────────────────────────────────
-   Demo report data builder — stands in for the real API response
-   the backend graph would return once the LangGraph run completes.
+   Small formatting helper for estimatedSecondsRemaining (a number,
+   per the API contract) → "3-5 minutes" style text.
    ─────────────────────────────────────────────────────────── */
-function buildDemoReport(formData) {
-  const target = formData?.researchTarget || "Apple Inc. (AAPL)";
-  const [name] = target.split("(");
-
-  return {
-    companyName: name.trim() || "Apple Inc.",
-    fullTitle: `${target} Intelligence Report`,
-    generatedAt: new Date().toLocaleString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    }),
-    stats: {
-      sourcesAnalyzed: 42,
-      insightsFound: 128,
-      factAccuracy: "98.7%",
-      runTime: "12m 34s",
-    },
-    reportSections: [
-      "Executive Summary",
-      "Financial Highlights",
-      "Key Developments & News",
-      "Market Sentiment Analysis",
-      "Competitor Intelligence",
-      "Risks & Opportunities",
-      "Sources & References",
-    ],
-  };
+function formatSeconds(totalSeconds) {
+  const minutes = Math.max(1, Math.round(totalSeconds / 60));
+  return `~${minutes} minute${minutes === 1 ? "" : "s"}`;
 }
