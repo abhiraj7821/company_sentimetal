@@ -3,6 +3,9 @@
   "build": {
     "builder": "NIXPACKS"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "deploy": {
     "startCommand": "node src/server.js",
     "healthcheckPath": "/health",

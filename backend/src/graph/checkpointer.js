@@ -1,6 +1,5 @@
 // src/graph/checkpointer.js
 import { PostgresSaver } from "@langchain/langgraph-checkpoint-postgres";
-import { SqliteSaver } from "@langchain/langgraph-checkpoint-sqlite";
 import { MemorySaver } from "@langchain/langgraph";
 import pool from "../db/pool.js";
 import logger from "../lib/logger.js";
@@ -19,11 +18,18 @@ export async function getCheckpointer() {
     return checkpointer;
   }
 
-  // Try SQLite if Postgres fails (or explicitly configured)
+  // SqliteSaver/better-sqlite3 are dynamically imported ONLY when actually
+  // needed. Both are native-module dependencies that require compiling
+  // against Python/node-gyp if no prebuilt binary matches the deploy
+  // target — a static top-level import would force npm to install (and
+  // potentially fail to build) them even in a Postgres-only deployment
+  // that never takes this code path. Move them to devDependencies in
+  // package.json to match — see accompanying notes.
   if (config.checkpointer === "sqlite" || !config.databaseUrl) {
-    // sqlite-saver requires a db file path; default to ':memory:' for ephemeral
     const dbPath = config.checkpointerPath || ":memory:";
     logger.info(`Using Sqlite checkpointer at ${dbPath}`);
+    const { SqliteSaver } =
+      await import("@langchain/langgraph-checkpoint-sqlite");
     const sqliteDb = await import("better-sqlite3").then((m) => m.default);
     const db = new sqliteDb(dbPath);
     checkpointer = new SqliteSaver(db);
@@ -42,7 +48,8 @@ export async function getCheckpointer() {
       { err },
       "Postgres checkpointer failed, falling back to Sqlite in-memory",
     );
-    // Fallback to Sqlite memory
+    const { SqliteSaver } =
+      await import("@langchain/langgraph-checkpoint-sqlite");
     const sqliteDb = await import("better-sqlite3").then((m) => m.default);
     const db = new sqliteDb(":memory:");
     checkpointer = new SqliteSaver(db);
