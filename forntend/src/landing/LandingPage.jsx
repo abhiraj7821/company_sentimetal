@@ -173,7 +173,8 @@ export default function LandingPage() {
 
             {/* Buttons */}
             <div className="flex flex-wrap gap-4 pt-2">
-              <button
+              <Link
+                to={"/agent"}
                 className="px-6 py-3 bg-[#2d2d2d] text-white text-xl border-[3px] border-[#2d2d2d] hover:bg-[#ff4d4d] hover:text-white hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
                 style={{ ...wobbly, ...shadowHard }}
                 onMouseEnter={(e) => {
@@ -186,8 +187,9 @@ export default function LandingPage() {
                 }}
               >
                 START RESEARCHING →
-              </button>
-              <button
+              </Link>
+              <Link
+                to={"/agent"}
                 className="px-6 py-3 bg-white text-[#2d2d2d] text-xl border-[3px] border-[#2d2d2d] hover:bg-[#e5e0d8] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100 flex items-center gap-2"
                 style={{ ...wobblyAlt, ...shadowHard }}
                 onMouseEnter={(e) =>
@@ -199,7 +201,7 @@ export default function LandingPage() {
               >
                 <Play className="w-5 h-5 fill-[#2d2d2d]" strokeWidth={2.5} />
                 SEE LIVE DEMO
-              </button>
+              </Link>
             </div>
 
             {/* Built With */}
@@ -595,7 +597,8 @@ export default function LandingPage() {
         </div>
 
         <div className="text-center mt-10">
-          <button
+          <Link
+            to={"/agent"}
             className="px-6 py-3 bg-[#2d5da1] text-white text-lg border-[3px] border-[#2d2d2d] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
             style={{ ...wobblyAlt, ...shadowHard }}
             onMouseEnter={(e) =>
@@ -606,7 +609,7 @@ export default function LandingPage() {
             }
           >
             EXPLORE THE FULL FLOW →
-          </button>
+          </Link>
         </div>
       </section>
 
