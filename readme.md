@@ -18,22 +18,26 @@ A competitive intelligence team wants a daily, cited report on a competitor’s 
 
 ## High‑Level Architecture
 
+```
+
                      ┌────────────────┐
                      │  Supervisor    │  (routes tasks, tracks state, decides when done)
                      └───────┬────────┘
-        ┌───────────┬────────┼────────┬────────────┐
-        ▼           ▼        ▼        ▼             ▼
+        ┌────────────────┬─────────────┼─────────────┬─────────────────┐
+        ▼                ▼             ▼             ▼                 ▼
 
-Filing Agent News Agent Sentiment Table Agent Web Scout
-(10-K/10-Q (RSS/API Agent (financial (product pages,
-RAG) ingest) (classify) tables) pricing pages)
-└───────────┴────────┴────────┴─────────────┘
-▼
-Critic/Verifier Agent (checks claims against sources, flags contradictions)
-▼
-Report Writer Agent (drafts w/ citations)
-▼
-Human-in-the-loop approval node (LangGraph interrupt())
+    Filing Agent    News Agent       Sentiment   Table Agent         Web Scout
+    (10-K/10-Q)      (RSS/API Agent) (financial) (product pages),
+    (RAG)           (ingest)         (classify)  (tables)           (pricing pages)
+    └───────────────────┴──────────────┴─────────────┴─────────────────┘
+                                       ▼
+    Critic/Verifier Agent (checks claims against sources, flags contradictions)
+                                       ▼
+            Report Writer Agent (drafts w/ citations)
+                                       ▼
+    Human-in-the-loop approval node (LangGraph interrupt())
+
+```
 
 All agents run **sequentially** to respect free‑tier LLM rate limits. A **critic agent** fact‑checks the draft against the raw research data; if it’s not grounded, the writer revises – this loop is capped at 2 revisions to prevent infinite cycles. After critic approval, the graph pauses for a **human‑in‑the‑loop** decision (via LangGraph’s `interrupt()`), then produces the final report.
 
