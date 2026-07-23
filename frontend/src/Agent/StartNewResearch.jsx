@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { startResearch } from "../lib/api.js";
+import NavbarHeader from "../components/navbarHeader.jsx";
 
 /* ───────────────────────────────────────────────────────────
    SentinelSwarm — Start New Research Screen
@@ -106,41 +107,7 @@ export default function StartNewResearch({ onLaunch }) {
       {/* ═══════════════════════════════════════════════════
           HEADER
           ═══════════════════════════════════════════════════ */}
-      <header className="border-b-[3px] border-[#2d2d2d] bg-[#fdfbf7]/95 backdrop-blur-sm">
-        <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-2 rotate-[-1deg]">
-            <Sparkles className="w-6 h-6 text-[#2d5da1]" strokeWidth={2.5} />
-            <div>
-              <span
-                className="text-2xl font-bold text-[#2d2d2d]"
-                style={{ fontFamily: "'Kalam', cursive" }}
-              >
-                SentinelSwarm
-              </span>
-              <div className="text-sm text-[#2d2d2d]/60 -mt-1">
-                AI Agent Swarm
-              </div>
-            </div>
-          </div>
-
-          {/* Back Button */}
-          <Link
-            className="flex items-center gap-2 px-4 py-2 bg-white text-[#2d2d2d] text-lg border-[3px] border-[#2d2d2d] hover:bg-[#e5e0d8] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100 cursor-pointer"
-            style={{ ...wobblySm, ...shadowHardSm }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.boxShadow = "2px 2px 0px 0px #2d2d2d")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.boxShadow = "3px 3px 0px 0px #2d2d2d")
-            }
-            to={"/"}
-          >
-            <ArrowLeft className="w-4 h-4" strokeWidth={2.5} />
-            Back to Dashboard
-          </Link>
-        </div>
-      </header>
+      <NavbarHeader />
 
       {/* ═══════════════════════════════════════════════════
           MAIN FORM

@@ -23,6 +23,9 @@ import {
   approveRun,
 } from "../lib/api.js";
 
+import { Link } from "react-router-dom";
+import NavbarHeader from "../components/navbarHeader.jsx";
+
 /* ───────────────────────────────────────────────────────────
    SentinelSwarm — Swarm In Action (Live Processing Screen)
    Tech: React + Tailwind CSS
@@ -249,41 +252,7 @@ export default function SwarmInAction({ formData, runId, onComplete, onStop }) {
       {/* ═══════════════════════════════════════════════════
           HEADER
           ═══════════════════════════════════════════════════ */}
-      <header className="border-b-[3px] border-[#2d2d2d] bg-[#fdfbf7]/95 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-2 rotate-[-1deg]">
-            <Sparkles className="w-6 h-6 text-[#2d5da1]" strokeWidth={2.5} />
-            <div>
-              <span
-                className="text-2xl font-bold text-[#2d2d2d]"
-                style={{ fontFamily: "'Kalam', cursive" }}
-              >
-                SentinelSwarm
-              </span>
-              <div className="text-sm text-[#2d2d2d]/60 -mt-1">
-                AI Agent Swarm
-              </div>
-            </div>
-          </div>
-
-          {/* Stop Run Button */}
-          <button
-            onClick={() => onStop && onStop()}
-            className="flex items-center gap-2 px-4 py-2 bg-[#ff4d4d] text-white text-lg border-[3px] border-[#2d2d2d] hover:bg-[#e53e3e] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
-            style={{ ...wobblySm, ...shadowHardSm }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.boxShadow = "2px 2px 0px 0px #2d2d2d")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.boxShadow = "3px 3px 0px 0px #2d2d2d")
-            }
-          >
-            <X className="w-4 h-4" strokeWidth={2.5} />
-            Stop Run
-          </button>
-        </div>
-      </header>
+      <NavbarHeader />
 
       {/* ═══════════════════════════════════════════════════
           MAIN CONTENT
@@ -857,13 +826,14 @@ export default function SwarmInAction({ formData, runId, onComplete, onStop }) {
               <p className="text-lg text-[#2d2d2d]/70 mb-4">
                 {runError || "The run failed unexpectedly. Please try again."}
               </p>
-              <button
+              <Link
+                to={"/agent"}
                 onClick={() => onStop && onStop()}
                 className="px-5 py-2.5 bg-white text-[#2d2d2d] text-base font-bold border-[3px] border-[#2d2d2d] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
                 style={{ ...wobblySm, ...shadowHardSm }}
               >
                 Back to Start
-              </button>
+              </Link>
             </div>
           </div>
         )}
