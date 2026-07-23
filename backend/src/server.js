@@ -18,6 +18,15 @@ app.set("trust proxy", 1); // Required for proper IP detection behind proxies
 app.use(cors());
 app.use(express.json());
 
+// Health route
+app.get("/", (req, res) => {
+  res.send("Working fine, do check /health.");
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 // Apply rate limiter ONLY to the research creation endpoint
 app.use("/research", researchLimiter);
 app.use(researchRoutes);
