@@ -15,7 +15,7 @@ import {
   Send,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import NavbarHeader from "../components/NavBarHeader.jsx";
+import NavBarHeader from "../components/NavBarHeader.jsx";
 
 /* ───────────────────────────────────────────────────────────
    SentinelSwarm — Research Complete (Results Screen)
@@ -147,7 +147,7 @@ export default function ResearchComplete({ reportData, onNewResearch }) {
       {/* ═══════════════════════════════════════════════════
           HEADER
           ═══════════════════════════════════════════════════ */}
-      <NavbarHeader />
+      <NavBarHeader />
 
       {/* ═══════════════════════════════════════════════════
           MAIN CONTENT

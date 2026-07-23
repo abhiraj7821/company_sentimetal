@@ -24,7 +24,7 @@ import {
 } from "../lib/api.js";
 
 import { Link } from "react-router-dom";
-import NavbarHeader from "../components/NavbarHeader.jsx";
+import NavBarHeader from "../components/NavBarHeader.jsx";
 
 /* ───────────────────────────────────────────────────────────
    SentinelSwarm — Swarm In Action (Live Processing Screen)
@@ -252,7 +252,7 @@ export default function SwarmInAction({ formData, runId, onComplete, onStop }) {
       {/* ═══════════════════════════════════════════════════
           HEADER
           ═══════════════════════════════════════════════════ */}
-      <NavbarHeader />
+      <NavBarHeader />
 
       {/* ═══════════════════════════════════════════════════
           MAIN CONTENT

@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { startResearch } from "../lib/api.js";
-import NavbarHeader from "../components/NavbarHeader.jsx";
+import NavBarHeader from "../components/NavBarHeader.jsx";
 
 /* ───────────────────────────────────────────────────────────
    SentinelSwarm — Start New Research Screen
@@ -107,7 +107,7 @@ export default function StartNewResearch({ onLaunch }) {
       {/* ═══════════════════════════════════════════════════
           HEADER
           ═══════════════════════════════════════════════════ */}
-      <NavbarHeader />
+      <NavBarHeader />
 
       {/* ═══════════════════════════════════════════════════
           MAIN FORM
