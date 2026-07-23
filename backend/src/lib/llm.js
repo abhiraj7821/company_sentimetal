@@ -45,13 +45,12 @@ function isRateLimitError(error) {
 function withRetry(fn, { maxRetries = 3, initialDelay = 1000 } = {}) {
   return async (...args) => {
     let lastError;
-    const effectiveMaxRetries = maxRetries;
-    for (let attempt = 1; attempt <= effectiveMaxRetries; attempt++) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         return await fn(...args);
       } catch (error) {
         lastError = error;
-        if (attempt === effectiveMaxRetries) throw error;
+        if (attempt === maxRetries) throw error;
 
         const rateLimited = isRateLimitError(error);
         const delay = rateLimited
@@ -101,8 +100,31 @@ export function getLLM(modelName = config.defaultLlmModel, options = {}) {
   let Provider;
   let apiKey;
   let isGroq = false;
+  let isOpenRouter = false;
 
-  if (modelName.startsWith("gpt-")) {
+  // ── OpenRouter: unified provider for all models ──────────────────────
+  if (config.openrouterApiKey) {
+    Provider = ChatOpenAI;
+    apiKey = config.openrouterApiKey;
+    isOpenRouter = true;
+
+    // OpenRouter model IDs are already provider-prefixed (e.g.
+    // "anthropic/claude-sonnet-4", "openai/gpt-5", "meta-llama/llama-4-maverick").
+    // If the caller passed a bare model name without a slash, prefix it
+    // with the likely provider so OpenRouter can route it.
+    if (!modelName.includes("/")) {
+      if (modelName.startsWith("gpt-")) {
+        modelName = `openai/${modelName}`;
+      } else if (modelName.startsWith("claude-")) {
+        modelName = `anthropic/${modelName}`;
+      } else if (modelName.startsWith("llama-")) {
+        modelName = `meta-llama/${modelName}`;
+      }
+      // Add more bare-name → OpenRouter ID mappings here as needed.
+    }
+  }
+  // ── Direct providers (fallback when OpenRouter key is missing) ───────
+  else if (modelName.startsWith("gpt-")) {
     Provider = ChatOpenAI;
     apiKey = config.openaiApiKey;
   } else if (modelName.startsWith("claude-")) {
@@ -125,16 +147,32 @@ export function getLLM(modelName = config.defaultLlmModel, options = {}) {
 
   if (!apiKey) {
     throw new Error(
-      `API key missing for model: ${modelName}. Set GROQ_API_KEY in your .env file.`,
+      `API key missing for model: ${modelName}. ` +
+        (isOpenRouter
+          ? "Set OPENROUTER_API_KEY in your .env file."
+          : "Set the relevant provider API key (GROQ_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY) in your .env file."),
     );
   }
 
-  const model = new Provider({
+  const modelConfig = {
     model: modelName,
     temperature,
     apiKey,
     ...options,
-  });
+  };
+
+  // When using OpenRouter we must point the OpenAI SDK at their endpoint.
+  if (isOpenRouter) {
+    modelConfig.configuration = {
+      baseURL: "https://openrouter.ai/api/v1",
+      defaultHeaders: {
+        "HTTP-Referer": config.appUrl || "http://localhost:3000",
+        "X-Title": config.appName || "My App",
+      },
+    };
+  }
+
+  const model = new Provider(modelConfig);
 
   const boundInvoke = model.invoke.bind(model);
   const boundStream = model.stream.bind(model);
@@ -142,6 +180,8 @@ export function getLLM(modelName = config.defaultLlmModel, options = {}) {
   // Groq calls: serialize through the shared queue AND retry with
   // rate-limit-aware backoff. This is what actually keeps you under the
   // org-wide TPM budget when multiple agents run "in parallel".
+  // OpenRouter calls do NOT need the Groq queue — they go through normal
+  // retry logic only.
   model.invoke = isGroq
     ? withRetry((...args) => enqueueGroqCall(() => boundInvoke(...args)), {
         maxRetries: 5,

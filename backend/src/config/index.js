@@ -24,6 +24,9 @@ const config = {
   groqApiKey: process.env.GROQ_API_KEY,
   openaiApiKey: process.env.OPENAI_API_KEY,
   anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+  openrouterApiKey: process.env.OPENROUTER_API_KEY,
+  appUrl: process.env.APP_URL,
+  appName: process.env.APP_NAME,
 
   // newsdata.io
   newsdata_api_key: process.env.NEWSDATA_API_KEY,
