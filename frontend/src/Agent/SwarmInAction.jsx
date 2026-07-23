@@ -24,7 +24,7 @@ import {
 } from "../lib/api.js";
 
 import { Link } from "react-router-dom";
-import NavbarHeader from "../components/navbarHeader.jsx";
+import NavbarHeader from "../components/NavbarHeader.jsx";
 
 /* ───────────────────────────────────────────────────────────
    SentinelSwarm — Swarm In Action (Live Processing Screen)

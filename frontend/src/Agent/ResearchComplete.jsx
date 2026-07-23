@@ -15,7 +15,7 @@ import {
   Send,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import NavbarHeader from "../components/navbarHeader";
+import NavbarHeader from "../components/NavBarHeader.jsx";
 
 /* ───────────────────────────────────────────────────────────
    SentinelSwarm — Research Complete (Results Screen)
