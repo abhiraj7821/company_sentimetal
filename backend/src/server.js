@@ -9,7 +9,7 @@ import statusRoutes from "./routes/status.js";
 import reportRoutes from "./routes/report.js";
 import streamRoutes from "./routes/stream.js";
 import approveRoutes from "./routes/approve.js";
-import stopRoutes from "./routes/stop.js";
+import router from "./routes/stop.js";
 
 import { researchLimiter } from "./middleware/rateLimiter.js";
 
@@ -26,7 +26,7 @@ app.use(statusRoutes);
 app.use(reportRoutes);
 app.use(streamRoutes);
 app.use(approveRoutes);
-app.use(stopRoutes);
+app.use(router);
 
 app.listen(config.port, () => {
   logger.info(`SentinelSwarm API listening on port ${config.port}`);

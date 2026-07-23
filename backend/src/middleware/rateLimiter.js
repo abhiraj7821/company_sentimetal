@@ -1,5 +1,5 @@
 // src/middleware/rateLimiter.js
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
 /**
  * Strict rate limiter:
@@ -12,8 +12,8 @@ export const researchLimiter = rateLimit({
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   keyGenerator: (req) => {
-    // Use the IP address from the request (handles proxies if trust proxy is set)
-    return req.ip;
+    // Use the built-in helper to normalize IPv6 addresses, preventing bypass.
+    return ipKeyGenerator(req);
   },
   handler: (req, res) => {
     res.status(429).json({
