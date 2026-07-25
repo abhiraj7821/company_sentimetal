@@ -84,6 +84,18 @@ export async function approveRun(runId, decision, comment) {
   return handleResponse(res);
 }
 
+// src/lib/api.js  ← add this export alongside your other helpers
+export async function cancelRun(runId) {
+  const res = await fetch(`${API_BASE_URL}/research/${runId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(body || `Failed to cancel run (${res.status})`);
+  }
+  return res.json();
+}
+
 /**
  * GET /research/:runId/stream (SSE) — live push updates. Returns the
  * EventSource so the caller can close it (e.g. in a useEffect cleanup).
