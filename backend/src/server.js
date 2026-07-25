@@ -40,3 +40,5 @@ app.use(router);
 app.listen(config.port, () => {
   logger.info(`SentinelSwarm API listening on port ${config.port}`);
 });
+
+export default app;
