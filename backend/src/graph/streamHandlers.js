@@ -4,11 +4,6 @@ import { updateRun, appendLog, getRun } from "./runStore.js";
 import { projectAgentStatuses, projectReport } from "./projector.js";
 import logger from "../lib/logger.js";
 
-// Maps top-level graph node names to human-readable log lines. Notice this
-// list only has 5 entries (supervisor, aggregator, report_writer, critic,
-// human_approval) — filing/news/sentiment/web_scout are NOT separate
-// top-level nodes (see the caveat in projector.js), so they can't get
-// their own log lines from graph.stream() alone.
 const NODE_LOG_META = {
   supervisor: { agent: "Supervisor", action: "Running research agents..." },
   aggregator: { agent: "Aggregator", action: "Merging research findings..." },
@@ -34,9 +29,6 @@ function buildLogEntry(nodeName) {
   return { agent: meta.agent, action: meta.action, status: "completed" };
 }
 
-/**
- * status values: "queued" | "running" | "awaiting_approval" | "completed" | "failed"
- */
 function deriveRunStatus(fullState) {
   const next = fullState.next || [];
   if (next.length === 0) return "completed";
@@ -44,10 +36,6 @@ function deriveRunStatus(fullState) {
   return "running";
 }
 
-/**
- * Simple 7-step progress heuristic. Not weighted by actual agent runtime —
- * good enough for a progress bar, not meant to be exact.
- */
 function computeProgress(graphState) {
   const steps = [
     Boolean(graphState.filing_data),
@@ -62,9 +50,15 @@ function computeProgress(graphState) {
   return Math.round((done / steps.length) * 100);
 }
 
-// Compiled graph is stateless w.r.t. individual runs (per-run state lives
-// in the checkpointer, keyed by thread_id), so one compiled instance is
-// safely reused across every run rather than rebuilding it per request.
+/**
+ * True for both the DOMException an AbortController produces and for any
+ * error LangGraph wraps around it — we only need "was this deliberately
+ * cancelled" vs "did something actually go wrong".
+ */
+function isAbortError(err) {
+  return err?.name === "AbortError" || /abort/i.test(err?.message || "");
+}
+
 let graphSingleton;
 async function getGraph() {
   if (!graphSingleton) graphSingleton = await buildGraph();
@@ -72,16 +66,14 @@ async function getGraph() {
 }
 
 /**
- * Drives one graph execution (a fresh run OR a resume-after-interrupt) and
- * projects every node transition into the run store in real time. This is
- * the ONLY place besides projector.js that touches GraphAnnotation — every
- * route file only ever reads runStore.
- *
- * @param {string} runId - also used as the LangGraph checkpointer thread_id
- * @param {object|Command} input - initial state object for a fresh run, or
- *   a `new Command({ resume: decision })` to continue past human_approval
+ * @param {string} runId
+ * @param {object|Command} input
+ * @param {{ signal?: AbortSignal }} [options] - AbortSignal from the
+ *   AbortController worker.js registers in activeControllers, so
+ *   DELETE /research/:runId can actually stop an in-flight node instead
+ *   of only removing a not-yet-started queue job.
  */
-export async function runGraphAndProject(runId, input) {
+export async function runGraphAndProject(runId, input, { signal } = {}) {
   const graph = await getGraph();
   const config = { configurable: { thread_id: runId }, recursionLimit: 1000 };
 
@@ -89,6 +81,7 @@ export async function runGraphAndProject(runId, input) {
     const stream = await graph.stream(input, {
       ...config,
       streamMode: "updates",
+      ...(signal ? { signal } : {}),
     });
 
     for await (const chunk of stream) {
@@ -98,18 +91,18 @@ export async function runGraphAndProject(runId, input) {
 
       const fullState = await graph.getState(config);
 
-      updateRun(runId, {
+      await updateRun(runId, {
         status: deriveRunStatus(fullState),
         agents: projectAgentStatuses(fullState.values),
         progress: computeProgress(fullState.values),
       });
 
-      appendLog(runId, buildLogEntry(nodeName));
+      await appendLog(runId, buildLogEntry(nodeName));
 
       if ((fullState.next || []).length === 0) {
-        const run = getRun(runId);
+        const run = await getRun(runId);
         const finishedAt = new Date().toISOString();
-        updateRun(runId, {
+        await updateRun(runId, {
           status: "completed",
           finishedAt,
           reportPayload: projectReport(fullState.values, run?.formData, {
@@ -121,14 +114,11 @@ export async function runGraphAndProject(runId, input) {
       }
     }
 
-    // After the stream loop, handle cases where the graph finished without
-    // emitting any more node updates (e.g., a resume that immediately ends).
-
-    const run = getRun(runId);
+    const run = await getRun(runId);
     if (run && run.status !== "completed" && run.status !== "failed") {
       const finalState = await graph.getState(config);
       const finishedAt = new Date().toISOString();
-      updateRun(runId, {
+      await updateRun(runId, {
         status: "completed",
         finishedAt,
         reportPayload: projectReport(finalState.values, run.formData, {
@@ -138,21 +128,25 @@ export async function runGraphAndProject(runId, input) {
         }),
       });
     }
-    // If the loop ends because human_approval called interrupt(), the last
-    // updateRun() call above already set status to "awaiting_approval" —
-    // nothing further to do here. graph.stream() does not throw on
-    // interrupt() the way graph.invoke() does.
   } catch (err) {
+    if (isAbortError(err)) {
+      // Deliberate cancellation via DELETE /research/:runId. That route
+      // already wrote the "failed"/CANCELLED status+error to the run
+      // record BEFORE calling controller.abort() — overwriting it here
+      // with a generic AGENT_TOOL_ERROR would stomp that message. Just
+      // log and stop; don't rethrow (worker.js's 'failed' handler would
+      // otherwise also try to overwrite the run record a second time).
+      logger.info({ runId }, "Graph run aborted by cancellation request.");
+      return;
+    }
+
     logger.error({ err, runId }, "Graph run failed");
-    updateRun(runId, {
+    await updateRun(runId, {
       status: "failed",
       finishedAt: new Date().toISOString(),
       error: {
         code: "AGENT_TOOL_ERROR",
-        agent: "unknown", // the doc's failure shape wants a specific agent name; graph.stream()
-        // doesn't surface which node threw once the error propagates out of
-        // the for-await loop, so this stays generic unless you wrap each
-        // node's own try/catch to tag the error before it bubbles up.
+        agent: "unknown",
         message: err.message || String(err),
         occurredAt: new Date().toISOString(),
       },
