@@ -15,15 +15,18 @@ export const GraphAnnotation = Annotation.Root({
   draft_report: Annotation({ default: () => "" }),
   critic_feedback: Annotation({ default: () => "" }),
 
-  // The critic's OWN verdict on the draft — separate from whether a human
-  // has approved the final report. Previously both were conflated into
-  // `approval_status`, which made the humanApproval UI card show
-  // "completed" the instant the critic approved, even before any human
-  // had actually reviewed anything.
-  critic_verdict: Annotation({ default: () => "pending" }), // "pending" | "approved"
+  // The critic's OWN verdict on the current draft. ONLY critic.js writes
+  // this. router.js's routeAfterCritic reads it to decide report_writer
+  // (revise) vs human_approval (proceed) — it must NOT read approval_status
+  // for that decision, since approval_status is reserved for the human.
+  critic_verdict: Annotation({ default: () => "pending" }), // "pending" | "approved" | "revise"
 
-  // Reserved EXCLUSIVELY for the human's decision now. Only humanApproval.js
-  // writes to this field.
+  // Reserved EXCLUSIVELY for the human's decision. Only humanApproval.js
+  // writes to this field. Previously the critic also wrote "approved"
+  // here, which made the humanApproval UI card report "completed" the
+  // instant the critic approved — before any human had actually reviewed
+  // anything. critic_verdict above now carries the critic's own opinion;
+  // this field only ever reflects what a human actually decided.
   approval_status: Annotation({ default: () => "pending" }), // "pending" | "approved" | "changes_requested"
 
   research_attempts: Annotation({ default: () => 0 }),
