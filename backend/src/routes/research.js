@@ -16,9 +16,18 @@ const router = Router();
 router.post("/research", async (req, res) => {
   try {
     const runId = uuidv4();
-    createRun(runId, req.body);
+    await createRun(runId, req.body);
 
-    await researchQueue.add("run", { runId, formData: req.body });
+    // Explicit jobId (run:{runId}) instead of BullMQ's auto-generated one —
+    // routes/stop.js needs a deterministic id to look the job up by runId
+    // alone. Prefixed with "run:" because "resume:{runId}" is a separate
+    // job added later on the same queue for the same runId; without the
+    // prefix the two would collide on jobId.
+    await researchQueue.add(
+      "run",
+      { runId, formData: req.body },
+      { jobId: `run-${runId}` },
+    );
 
     res.status(202).json({
       runId,
