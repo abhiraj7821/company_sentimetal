@@ -45,6 +45,7 @@ export function projectAgentStatuses(graphState = {}) {
     aggregated_findings,
     draft_report,
     critic_feedback,
+    critic_verdict,
     approval_status,
   } = graphState;
 
@@ -54,29 +55,29 @@ export function projectAgentStatuses(graphState = {}) {
   const draftExists = hasContent(draft_report);
   const criticHasRun = hasContent(critic_feedback);
 
-  // reportWriter: "in-progress" once a draft exists but hasn't been
-  // reviewed yet; "completed" once the critic has weighed in on it.
-  // (If the critic sends it back for revision, a fresh draft_report
-  // overwrites the old one and criticHasRun logically applies to the
-  // draft the critic most recently saw — good enough for status display,
-  // not meant to be a perfect audit trail.)
   let reportWriterStatus = "pending";
   if (draftExists && !criticHasRun) reportWriterStatus = "in-progress";
   else if (draftExists && criticHasRun) reportWriterStatus = "completed";
 
+  // Critic card reflects the CRITIC's own verdict now, not the human's
+  // decision. "in-progress" covers both "critic hasn't run yet on this
+  // draft" mid-cycle states and "critic sent it back for revision".
   let criticStatus = "pending";
-  if (criticHasRun) {
-    criticStatus = approval_status === "approved" ? "completed" : "in-progress";
+  if (critic_verdict === "approved") {
+    criticStatus = "completed";
+  } else if (criticHasRun) {
+    criticStatus = "in-progress";
   }
 
+  // Human approval card is driven purely by approval_status. It becomes
+  // "active" (awaiting a human) once the critic has approved but no
+  // human decision has been recorded yet.
   let humanApprovalStatus = "pending";
   if (approval_status === "approved") {
     humanApprovalStatus = "completed";
   } else if (approval_status === "changes_requested") {
     humanApprovalStatus = "in-progress";
-  } else if (criticStatus === "completed") {
-    // critic approved but a human still needs to confirm — this is the
-    // "awaiting_approval" run-level state, i.e. this card is active now.
+  } else if (critic_verdict === "approved") {
     humanApprovalStatus = "active";
   }
 
