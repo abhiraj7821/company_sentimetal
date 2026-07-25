@@ -12,8 +12,9 @@ const AVG_SECONDS_PER_REMAINING_AGENT = 20;
  * GET /research/:runId/status
  * Pure read — never touches GraphAnnotation, only the run store.
  */
-router.get("/research/:runId/status", (req, res) => {
-  const run = getRun(req.params.runId);
+router.get("/research/:runId/status", async (req, res) => {
+  // status.js — inside the handler:
+  const run = await getRun(req.params.runId);
   if (!run) {
     return res.status(404).json({
       error: { code: "RUN_NOT_FOUND", message: "No run with that id." },
