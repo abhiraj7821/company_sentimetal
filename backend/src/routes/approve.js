@@ -15,7 +15,7 @@ const VALID_DECISIONS = ["approved", "changes_requested"];
  */
 router.post("/research/:runId/approve", async (req, res) => {
   const { runId } = req.params;
-  const run = getRun(runId);
+  const run = await getRun(runId);
   if (!run) {
     return res.status(404).json({
       error: { code: "RUN_NOT_FOUND", message: "No run with that id." },
@@ -39,12 +39,15 @@ router.post("/research/:runId/approve", async (req, res) => {
     });
   }
 
-  updateRun(runId, { status: "running" }); // optimistic, matches the contract's response
-  await researchQueue.add("resume", {
-    runId,
-    decision,
-    comment: comment || null,
-  });
+  await updateRun(runId, { status: "running" }); // optimistic, matches the contract's response
+
+  // "resume:" prefix keeps this job's id distinct from the original
+  // "run:{runId}" job on the same queue — see research.js's comment.
+  await researchQueue.add(
+    "resume",
+    { runId, decision, comment: comment || null },
+    { jobId: `resume-${runId}` },
+  );
 
   res.json({ runId, status: "running", approval_status: decision });
 });
