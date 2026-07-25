@@ -4,14 +4,9 @@ import { Command } from "@langchain/langgraph";
 import { redisConnection } from "./researchQueue.js";
 import { runGraphAndProject } from "../graph/streamHandlers.js";
 import { updateRun } from "../graph/runStore.js";
+import { activeControllers } from "../lib/activeRuns.js";
 import logger from "../lib/logger.js";
 
-/**
- * Translates the frontend's POST /research body (§1 of the API contract)
- * into GraphAnnotation's initial state shape. This is the one place that
- * knows about both shapes, kept separate from projector.js (which handles
- * the reverse direction: graph state -> contract JSON).
- */
 function mapFormDataToGraphState(formData) {
   const tickerMatch = formData?.researchTarget?.match(/\(([^)]+)\)/);
   const company = tickerMatch ? tickerMatch[1] : formData?.researchTarget || "";
@@ -31,11 +26,23 @@ function mapFormDataToGraphState(formData) {
 }
 
 /**
- * BullMQ (unlike Bull v3) doesn't have per-job-name `.process(name, fn)`
- * registration on a single queue — one Worker's processor function
- * receives every job on the queue and switches on `job.name` instead.
- * This replaces the pseudocode's two separate `worker.process(...)` calls.
+ * Registers an AbortController for this runId so DELETE /research/:runId
+ * can actually interrupt an in-flight node, then guarantees cleanup so a
+ * completed/failed run doesn't leave a stale controller behind that a
+ * LATER run with a reused... (runIds are uuids, so reuse won't happen,
+ * but leaking Map entries indefinitely still isn't fine) — always
+ * deleted in `finally` regardless of outcome.
  */
+async function withAbortController(runId, fn) {
+  const controller = new AbortController();
+  activeControllers.set(runId, controller);
+  try {
+    return await fn(controller.signal);
+  } finally {
+    activeControllers.delete(runId);
+  }
+}
+
 const worker = new Worker(
   "research",
   async (job) => {
@@ -44,19 +51,21 @@ const worker = new Worker(
     if (job.name === "run") {
       const { formData } = job.data;
       const initialState = mapFormDataToGraphState(formData);
-      updateRun(runId, { status: "running" });
-      await runGraphAndProject(runId, initialState);
+      await updateRun(runId, { status: "running" });
+      await withAbortController(runId, (signal) =>
+        runGraphAndProject(runId, initialState, { signal }),
+      );
       return;
     }
 
     if (job.name === "resume") {
       const { decision, comment } = job.data;
-      // Matches the shape humanApproval.js already expects:
-      // const { approved, feedback } = decision || {};
       const resumeCommand = new Command({
         resume: { approved: decision === "approved", feedback: comment },
       });
-      await runGraphAndProject(runId, resumeCommand);
+      await withAbortController(runId, (signal) =>
+        runGraphAndProject(runId, resumeCommand, { signal }),
+      );
       return;
     }
 
@@ -68,11 +77,19 @@ const worker = new Worker(
   { connection: redisConnection },
 );
 
-worker.on("failed", (job, err) => {
+worker.on("failed", async (job, err) => {
   const runId = job?.data?.runId;
+  // Deliberate cancellations already have their final "failed"/CANCELLED
+  // status written by routes/stop.js — don't let this generic handler
+  // overwrite that with AGENT_TOOL_ERROR.
+  if (/abort/i.test(err?.message || "") || err?.name === "AbortError") {
+    logger.info({ runId, jobName: job?.name }, "Job aborted by cancellation.");
+    return;
+  }
+
   logger.error({ err, runId, jobName: job?.name }, "Research job failed");
   if (runId) {
-    updateRun(runId, {
+    await updateRun(runId, {
       status: "failed",
       finishedAt: new Date().toISOString(),
       error: {
