@@ -20,20 +20,31 @@ router.delete("/research/:runId", async (req, res) => {
     activeControllers.delete(runId);
   }
 
-  // 2. Remove the BullMQ job (if it hasn't started processing yet)
+  // 2. Remove the BullMQ job, if it hasn't started processing yet.
+  // A run can be cancelled at two different job stages, each with its
+  // own jobId (see research.js / approve.js): the original "run:{runId}"
+  // job, or — if cancelled after an approval cycle was already kicked
+  // off — the "resume:{runId}" job. Check both; neither existing just
+  // means the job already finished or is actively running (job.remove()
+  // only removes queued/waiting jobs anyway, not active ones).
   try {
-    const job = await researchQueue.getJob(runId);
-    if (job) {
-      await job.remove();
+    const runJob = await researchQueue.getJob(`run-${runId}`);
+    if (runJob) {
+      await runJob.remove();
+    }
+    const resumeJob = await researchQueue.getJob(`resume-${runId}`);
+    if (resumeJob) {
+      await resumeJob.remove();
     }
   } catch (err) {
-    // Job might already be gone or Redis unreachable – non‑fatal
+    // Job might already be gone, active (not removable), or Redis
+    // unreachable – non-fatal, run status update below still proceeds.
   }
 
   // 3. Update the run store to reflect cancellation
-  const existing = getRun(runId);
+  const existing = await getRun(runId);
   if (existing) {
-    updateRun(runId, {
+    await updateRun(runId, {
       status: "failed",
       finishedAt: new Date().toISOString(),
       error: {
