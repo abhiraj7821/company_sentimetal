@@ -10,8 +10,9 @@ const router = Router();
  * projector.js's projectReport() when the run completed, and cached on
  * the run record by streamHandlers.js.
  */
-router.get("/research/:runId/report", (req, res) => {
-  const run = getRun(req.params.runId);
+router.get("/research/:runId/report", async (req, res) => {
+  // report.js — inside the handler:
+  const run = await getRun(req.params.runId);
   if (!run) {
     return res.status(404).json({
       error: { code: "RUN_NOT_FOUND", message: "No run with that id." },
